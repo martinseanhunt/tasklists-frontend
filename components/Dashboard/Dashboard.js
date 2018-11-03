@@ -11,8 +11,6 @@ import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
   calculateProgress = (category) => {
-    console.log(category)
-
     if(!category.tasks) return `0%`
     if(!category.tasks.length) return `0%`
 
@@ -21,8 +19,6 @@ class Dashboard extends Component {
       category.tasks.filter(task => ['COMPLETED', 'CLOSED'].includes(task.status))
       .length
     
-    // console.log(Math.floor(completedTasks*100/totalTasks))
-
     return `calc(${Math.floor(completedTasks*100/totalTasks)}% + 2px)`
   }
 
@@ -38,6 +34,21 @@ class Dashboard extends Component {
     // as a prop
 
     // TODO allow user to toggle between list and card view
+
+    // TODO allow an admin to create a list from this page
+
+    // TODO make sure cards are always the same height
+
+    // Work out how to divide the row
+    let division = 'halves'
+
+    if(categories.length > 2 ) 
+      division = categories.length % 3 === 0
+        ? 'thirds'
+        : 'fourths'
+
+    console.log(division)
+
     return (
       <>
       <Col>
@@ -47,7 +58,7 @@ class Dashboard extends Component {
       </Col>
       <Row>
         {categories && categories.map((category, i) => (
-          <Col key={category.id} fourth>
+          <Col key={category.id} division={division}>
             <Card>
               <CardInner>
                 <h3>{category.name}</h3>

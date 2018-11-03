@@ -7,6 +7,11 @@ import Dashboard from '../components/Dashboard/Dashboard'
 // TODO Should tasks be moved in to their own query for each category on the page? 
 // I think that probably makes more sense! 
 
+/* BIGQUESTION: would it be better to, from within a progressbar component, get the aggregate of all posts where category = category. Would need to write 2 queries one to get the count of copleted items and one to get the count of total.
+
+OR : is the below fine? At what point would it become sluggish? 
+*/
+
 const ALL_CATEGORIES_QUERY = gql`
   query ALL_CATEGORIES_QUERY {
     categories {
@@ -15,7 +20,6 @@ const ALL_CATEGORIES_QUERY = gql`
       description
       slug
       tasks {
-        id
         status
       }
     }
