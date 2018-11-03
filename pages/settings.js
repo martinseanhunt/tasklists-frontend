@@ -1,11 +1,14 @@
 import User from '../components/providers/User'
 import Users from '../components/settings/Users'
+import Categories from '../components/settings/Categories'
 
 import Col from '../components/styles/grid/Col'
 
 // TODO improve role checks... helper function
 
 // TODO improve page headings
+
+// TODO put each of these on their own sub page
 
 const Settings = () => (
   <User>
@@ -20,6 +23,10 @@ const Settings = () => (
           {data.me 
             && ['ADMIN', 'SUPERADMIN'].includes(data.me.role)
             && <Users /> }
+
+          {data.me 
+            && ['ADMIN', 'SUPERADMIN'].includes(data.me.role)
+            && <Categories /> }
         </Col>
       )
     }}
