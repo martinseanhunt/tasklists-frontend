@@ -10,7 +10,25 @@ import CardInner from '../styles/card/CardInner'
 import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
+  calculateProgress = (category) => {
+    console.log(category)
+
+    if(!category.tasks) return `0%`
+    if(!category.tasks.length) return `0%`
+
+    const totalTasks = category.tasks.length
+    const completedTasks = 
+      category.tasks.filter(task => ['COMPLETED', 'CLOSED'].includes(task.status))
+      .length
+    
+    // console.log(Math.floor(completedTasks*100/totalTasks))
+
+    return `calc(${Math.floor(completedTasks*100/totalTasks)}% + 2px)`
+  }
+
   render() {
+
+    // TODO do we really need the user here?
     const { user, categories } = this.props
 
     // TODO when we can get the count of tasks aassigned to a category
@@ -19,14 +37,12 @@ class Dashboard extends Component {
     // TODO make progress bar it's own component - pass in the percentage
     // as a prop
 
-    // TODO round edges of progress bar
-
-    // TODO figure out why font awesome loads huge at first https://github.com/FortAwesome/vue-fontawesome/issues/14
+    // TODO allow user to toggle between list and card view
     return (
       <>
       <Col>
         <SectionHeader>
-          <h2><FontAwesomeIcon icon="list"/>Task Collections</h2>
+          <h2><FontAwesomeIcon icon="list"/>Lists</h2>
         </SectionHeader>
       </Col>
       <Row>
@@ -41,7 +57,7 @@ class Dashboard extends Component {
 
                 <span>Tasks Completed</span>
                 <div className="progress">
-                  <span style={{ width: '40%' }}></span>
+                  <span style={{ width: this.calculateProgress(category) }}></span>
                 </div>
               </CardInner>
               <CardFooter>

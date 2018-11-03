@@ -37,10 +37,17 @@ const CardInner = styled.div`
     background: #E6E7E8;
     width: 90%;
     border-radius: 2px;
+    border: 1px solid #E6E7E8;
+    overflow: visible;
     
     span {
       background: #1665d8;
       height: 4px;
+      position: relative;
+      top: -1px;
+      left: -1px;
+      border-radius: 2px;
+      border: 1px solid #1665d8;
     }
   }
 `

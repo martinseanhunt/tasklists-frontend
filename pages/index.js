@@ -4,12 +4,19 @@ import gql from 'graphql-tag'
 import User from '../components/providers/User'
 import Dashboard from '../components/Dashboard/Dashboard'
 
+// TODO Should tasks be moved in to their own query for each category on the page? 
+// I think that probably makes more sense! 
+
 const ALL_CATEGORIES_QUERY = gql`
   query ALL_CATEGORIES_QUERY {
     categories {
       id
       name
       description
+      tasks {
+        id
+        status
+      }
     }
   }
 `
