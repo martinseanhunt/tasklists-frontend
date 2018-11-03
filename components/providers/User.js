@@ -12,6 +12,8 @@ const CURRENT_USER_QUERY = gql`
   }
 `
 
+// TODO would it be better to handle loading and errors here and just pass down the data
+
 const User = props => (
   <Query {...props} query={CURRENT_USER_QUERY}>
     {payload => (props.children(payload))}

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-const WidgetHeader = styled.footer`
+const WidgetFooter = styled.footer`
   height: 75px;
   padding: 0 30px;
   display: flex;
@@ -8,4 +8,4 @@ const WidgetHeader = styled.footer`
   justify-content: space-between;
 `
 
-export default WidgetHeader
+export default WidgetFooter

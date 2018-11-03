@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import User from '../providers/User'
 import SignOut from '../SignIn/SignOut'
@@ -20,9 +21,12 @@ const Header = () => (
   <User>
     {({data}) => (
       <HeaderStyles>
-        <h1><Link href="/"><a>DevLinks</a></Link></h1>
+        <h1>
+          <FontAwesomeIcon icon="check" />
+          <Link href="/"><a>TaskLists</a></Link>
+        </h1>
         <nav>
-          <Link href="/"><a>Home</a></Link>
+          <Link href="/"><a>Dashboard</a></Link>
           <Link href="/create"><a>New Task</a></Link>
           <Link href="/settings"><a>Settings</a></Link>
           <SignOut/>
@@ -60,9 +64,7 @@ const HeaderStyles = styled.header`
   }
 
   svg {
-    position: relative;
-    top: 3px;
-    left: -5px;
+    margin-right: 5px;
   }
 
   nav {    

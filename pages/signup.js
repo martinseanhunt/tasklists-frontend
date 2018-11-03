@@ -17,6 +17,8 @@ const USER_BY_TOKEN_QUERY = gql`
 
 // TODO redirect if invalid token or just link to signup? 
 
+// TODO PRIORITY redirect if user is already signed iN! Pass user down to child
+
 const Index = ({ query }) => 
   <Query query={USER_BY_TOKEN_QUERY} variables={{ token: query.token }}>
     {({data, loading, error}) => {

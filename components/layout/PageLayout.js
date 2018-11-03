@@ -10,7 +10,7 @@ import GlobalStyles from '../styles/GlobalStyles'
 import User from '../providers/User'
 import Header from './Header'
 import SignIn from '../SignIn/SignIn'
-import SignUp from '../SignIn/SignUp'
+import Icons from './Icons'
 
 Router.onRouteChangeStart = () => NProgress.start()
 Router.onRouteChangeComplete = () => NProgress.done()

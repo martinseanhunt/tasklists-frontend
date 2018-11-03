@@ -1,13 +1,17 @@
 import React, { Component } from 'react'
 import { Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
-import styled from 'styled-components'
+import Router from 'next/router'
 
 import SignInButton from '../styles/signIn/SignInButton'
 import BigImage from '../styles/signIn/BigImage'
 import SignInContainer from '../styles/signIn/SignInContainer'
 import SignInInner from '../styles/signIn/SignInInner'
 import Form from '../styles/Form'
+
+// TODO PRIORITY redirect if user is already signed iN!
+
+// TODO change the name of the signIn folder to something else... auth maybe?
 
 import { CURRENT_USER_QUERY } from '../providers/User'
 
@@ -40,6 +44,7 @@ class SignUp extends Component {
         mutation={SIGNIN_MUTATION}
         refetchQueries={[{query: CURRENT_USER_QUERY}]}
         variables={{ email, password }}
+        onCompleted={() => Router.push('/')}
       >
         {(signIn, {error, loading}) => (
           <SignInContainer>
