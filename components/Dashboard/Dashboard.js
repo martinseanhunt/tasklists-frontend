@@ -61,7 +61,7 @@ class Dashboard extends Component {
                 </div>
               </CardInner>
               <CardFooter>
-                <Link href={`/tasks/` + category.id}>
+                <Link href={`/tasks/` + category.slug}>
                   <a>View Tasks →</a>
                 </Link>
               </CardFooter>

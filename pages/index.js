@@ -13,6 +13,7 @@ const ALL_CATEGORIES_QUERY = gql`
       id
       name
       description
+      slug
       tasks {
         id
         status
