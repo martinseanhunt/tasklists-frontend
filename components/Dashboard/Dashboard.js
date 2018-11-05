@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Link from 'next/link'
+import { Router, Link } from '../../routes'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -39,6 +39,13 @@ class Dashboard extends Component {
 
     // TODO make sure cards are always the same height
 
+    // TODO PRIORITY FIX QUEY BEING OVERWRITTEN FOR PROGRESS BAR
+    // Change the way the category page is grabbing the tasks.
+    // just make two queries, one to get the category info and one to get the
+    // tasks on their own. Othwerwise the categories>task filter is being 
+    // applied to the category in cache that this page reads from!
+
+
     // Work out how to divide the row
     let division = 'halves'
 
@@ -46,8 +53,6 @@ class Dashboard extends Component {
       division = categories.length % 3 === 0
         ? 'thirds'
         : 'fourths'
-
-    console.log(division)
 
     return (
       <>
@@ -59,7 +64,10 @@ class Dashboard extends Component {
       <Row>
         {categories && categories.map((category, i) => (
           <Col key={category.id} division={division}>
-            <Card>
+            <Card
+              onClick={() => Router.pushRoute('list', { slug: category.slug })}
+              clickable
+            >
               <CardInner>
                 <h3>{category.name}</h3>
                 <p>{category.description.length > 100 
@@ -72,7 +80,7 @@ class Dashboard extends Component {
                 </div>
               </CardInner>
               <CardFooter>
-                <Link href={`/tasks/` + category.slug}>
+                <Link route="list" params={{ slug: category.slug }}>
                   <a>View Tasks →</a>
                 </Link>
               </CardFooter>
