@@ -2,20 +2,20 @@ import React, { Component } from 'react'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 
-import CategoryCard from './CategoryCard'
-import AddCategory from './AddCategory'
+import TaskListCard from './TaskListCard'
+import CreateTaskList from './CreateTaskList'
 
 import Widget from '../styles/widget/Widget'
 import WidgetHeader from '../styles/widget/WidgetHeader'
 import WidgetTable from '../styles/widget/WidgetTable'
 import Button from '../styles/Button'
 
-const ALL_CATEORIES_QUERY = gql`
-  query ALL_CATEORIES_QUERY {
-    categories {
+const ALL_TASKLISTS_QUERY = gql`
+  query ALL_TASKLISTS_QUERY {
+    taskLists {
       id
       name
-      categoryFields {
+      taskListFields {
         id
         fieldName
         fieldType
@@ -28,13 +28,13 @@ const ALL_CATEORIES_QUERY = gql`
 
 // TODO improve visual error messages & Loading states
 
-// TODO edit category
+// TODO edit TaskList
 
-// TODO delete category
+// TODO delete TaskList
 
 // TODO Add pagination and cache clearing
 
-// TODO category ordering
+// TODO TaskList ordering
 
 // TODO move error and loading outside of table. eep inside widget tho
 
@@ -42,7 +42,7 @@ const ALL_CATEORIES_QUERY = gql`
 // https://github.com/jquense/yup
 
 
-class Categories extends Component {
+class TaskLists extends Component {
   state={
     showModal: false
   }
@@ -50,13 +50,13 @@ class Categories extends Component {
   render = () => (
     <Widget marginTop>
       <WidgetHeader>
-        <h3>Categories</h3>
+        <h3>TaskLists</h3>
         <div>
           <Button 
             onClick={() => this.setState({ showModal: true })}
             primary
           >
-            Add Category
+            Add TaskList
           </Button>
         </div>
       </WidgetHeader>
@@ -72,22 +72,22 @@ class Categories extends Component {
           </tr>
         </thead>
         <tbody>
-          <Query query={ALL_CATEORIES_QUERY}>
+          <Query query={ALL_TASKLISTS_QUERY}>
             {({data, error, loading}) => {
 
               if(error) return <tr><td colSpan="6">Something went wrong!</td></tr>
               if(loading) return <tr><td colSpan="6">Loading...</td></tr>
   
-              const { categories } = data
+              const { taskLists } = data
 
-              return categories.length > 0 && categories
-                .map(category => <CategoryCard category={category} key={category.id}/>)
+              return taskLists.length > 0 && taskLists
+                .map(taskList => <TaskListCard taskList={taskList} key={taskList.id}/>)
             }}
           </Query>
         </tbody>
       </WidgetTable>
 
-      <AddCategory
+      <CreateTaskList
         showModal={this.state.showModal}
         closeModal={() => this.setState({ showModal: false })}
       />
@@ -96,5 +96,5 @@ class Categories extends Component {
   )
 } 
 
-export default Categories
-export { ALL_CATEORIES_QUERY }
+export default TaskLists
+export { ALL_TASKLISTS_QUERY }

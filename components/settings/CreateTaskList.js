@@ -10,19 +10,18 @@ import WidgetRow from '../styles/widget/WidgetRow'
 import WidgetFooter from '../styles/widget/WidgetFooter'
 import Form from '../styles/Form'
 import Button from '../styles/Button'
+import { ALL_TASKLISTS_QUERY } from './TaskLists';
 
-import { ALL_CATEORIES_QUERY } from './Categories'
-
-const CREATE_CATEGORY_MUTATION = gql`
-  mutation CREATE_CATEGORY_MUTATION(
+const CREATE_TASKLIST_MUTATION = gql`
+  mutation CREATE_TASKLIST_MUTATION(
     $name: String!, 
     $description: String!, 
-    $categoryFields: [CategoryFieldCreateWithoutCategoryInput]
+    $taskListFields: [TaskListFieldCreateWithoutTaskListInput]
   ) {
-    createCategory(
+    createTaskList(
       name: $name
       description: $description
-      categoryFields: $categoryFields
+      taskListFields: $taskListFields
     ){
       name
       description
@@ -40,23 +39,23 @@ const CREATE_CATEGORY_MUTATION = gql`
 
 // TODO only scroll on middle widget container
 
-class AddUser extends Component {
+class CreateTaskList extends Component {
   scrollableWidget = React.createRef()
 
   state = {
     name: '',
     description: '',
-    categoryFields: []
+    taskListFields: []
   }
 
   handleChange = e => {
     const { name, id } = e.target.dataset
 
     if(['fieldName', 'fieldType'].includes(name)){
-      const categoryFields = [...this.state.categoryFields]
-      categoryFields[id][name] = e.target.value
+      const taskListFields = [...this.state.taskListFields]
+      taskListFields[id][name] = e.target.value
 
-      return this.setState({ categoryFields })
+      return this.setState({ taskListFields })
     }
 
     this.setState({ [e.target.name]: e.target.value })
@@ -66,7 +65,7 @@ class AddUser extends Component {
     this.setState({
       name: '',
       description: '',
-      categoryFields: [{fieldName: '', fieldType: 'STRING'}]
+      taskListFields: [{fieldName: '', fieldType: 'STRING'}]
     })
 
     this.props.closeModal()
@@ -74,7 +73,7 @@ class AddUser extends Component {
   
   addCustomField = e => {
     this.setState(state => ({
-      categoryFields: [...state.categoryFields, {fieldName: '', fieldType: 'STRING'}]
+      taskListFields: [...state.taskListFields, {fieldName: '', fieldType: 'STRING'}]
     }), () => {
       // scroll to bottom of container if it's scrolalble
       const widget = this.scrollableWidget
@@ -82,34 +81,34 @@ class AddUser extends Component {
     })
   }
 
-  createCategory = (createCategory) => createCategory({
+  createTaskList = (createTaskList) => createTaskList({
     variables: {
       ...this.state,
-      categoryFields: this.state.categoryFields
+      taskListFields: this.state.taskListFields
         .filter(field => field.fieldName !== '')
     }
   })
 
   removeField = i => this.setState(state => ({
-    categoryFields: state.categoryFields
+    taskListFields: state.taskListFields
       .filter((field, index) => index !== i)
   }))
 
   render() {
     const { showModal, closeModal } = this.props
-    const { name, description, categoryFields } = this.state
+    const { name, description, taskListFields } = this.state
 
     return showModal ? (
       <Mutation 
-        mutation={CREATE_CATEGORY_MUTATION}
-        refetchQueries={[{ query: ALL_CATEORIES_QUERY }]}
+        mutation={CREATE_TASKLIST_MUTATION}
+        refetchQueries={[{ query: ALL_TASKLISTS_QUERY }]}
         onCompleted={this.onCompleted}
       >
-        {(createCategory, { error, loading }) => (
+        {(createTaskList, { error, loading }) => (
           <ModalContainer onClick={closeModal}>
             <ModalInner onClick={(e) => e.stopPropagation()}>
               <WidgetHeader>
-                <h3>Create New Category</h3>
+                <h3>Create New TaskList</h3>
                 <button 
                   className="close"
                   onClick={closeModal}
@@ -121,39 +120,39 @@ class AddUser extends Component {
               >
                 {error && <p>{error.message}</p>}
                 <UserForm>
-                  <label htmlFor="name">Category Name
+                  <label htmlFor="name">TaskList Name
                     <input 
                       onChange={this.handleChange}
                       name="name"  
                       type="text"
                       value={name}
-                      placeholder="Category Name"
+                      placeholder="TaskList Name"
                     ></input>
                   </label>
     
-                  <label htmlFor="email">Category description
+                  <label htmlFor="email">TaskList description
                     <textarea 
                       onChange={this.handleChange}
                       name="description"  
                       type="text"
                       value={description}
-                      placeholder="This category is for..."
+                      placeholder="This TaskList is for..."
                     ></textarea>
                   </label>
 
-                  <label htmlFor="categoryFields">
-                    Cusom Category Feilds
-                    <span>These are optional, category specific, fields that appear in addition to the default fields.</span>
+                  <label htmlFor="taskListFields">
+                    Cusom TaskList Feilds
+                    <span>These are optional, TaskList specific, fields that appear in addition to the default fields.</span>
                   </label>
 
-                  {categoryFields.map((categoryField, i) => {
+                  {taskListFields.map((_, i) => {
                     const fieldNameName = 'fieldName' + i
                     const fieldTypeName = 'fieldType' + i
                     
                     return (
                       <fieldset 
-                        name="categoryFields" 
-                        key={'categoryFields' + i}
+                        name="taskListFields" 
+                        key={'taskListFields' + i}
                         className={i > 0 ? 'no-margin' : ''}  
                       >
                         
@@ -164,7 +163,7 @@ class AddUser extends Component {
                               type="text"
                               placeholder="Field Name"
                               onChange={this.handleChange}
-                              value={this.state.categoryFields[i].fieldName}
+                              value={this.state.taskListFields[i].fieldName}
                               data-id={i}
                               data-name='fieldName'
                             />
@@ -174,7 +173,7 @@ class AddUser extends Component {
                             <select
                               name={fieldTypeName}
                               onChange={this.handleChange}
-                              value={this.state.categoryFields[i].fieldType}
+                              value={this.state.taskListFields[i].fieldType}
                               data-id={i}
                               data-name='fieldType'
                             >
@@ -213,10 +212,10 @@ class AddUser extends Component {
                 >Cancel</Button>
                 <Button 
                   secondary 
-                  onClick={() => this.createCategory(createCategory)}
+                  onClick={() => this.createTaskList(createTaskList)}
                   disabled={loading}
                 >
-                  Create Category
+                  Create Task List
                 </Button>
               </WidgetFooter>
             </ModalInner>
@@ -248,4 +247,4 @@ const AddNew = styled.div`
   margin-bottom: 10px;
 `
 
-export default AddUser
+export default CreateTaskList

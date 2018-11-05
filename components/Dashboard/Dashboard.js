@@ -10,13 +10,13 @@ import CardInner from '../styles/card/CardInner'
 import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
-  calculateProgress = (category) => {
-    if(!category.tasks) return `0%`
-    if(!category.tasks.length) return `0%`
+  calculateProgress = (taskList) => {
+    if(!taskList.tasks) return `0%`
+    if(!taskList.tasks.length) return `0%`
 
-    const totalTasks = category.tasks.length
+    const totalTasks = taskList.tasks.length
     const completedTasks = 
-      category.tasks.filter(task => ['COMPLETED', 'CLOSED'].includes(task.status))
+      taskList.tasks.filter(task => ['COMPLETED', 'CLOSED'].includes(task.status))
       .length
     
     return `calc(${Math.floor(completedTasks*100/totalTasks)}% + 2px)`
@@ -25,9 +25,9 @@ class Dashboard extends Component {
   render() {
 
     // TODO do we really need the user here?
-    const { user, categories } = this.props
+    const { user, taskLists } = this.props
 
-    // TODO when we can get the count of tasks aassigned to a category
+    // TODO when we can get the count of tasks aassigned to a taskList
     // Show the number of open tasks and a percentage bar of ompleted tasks
 
     // TODO make progress bar it's own component - pass in the percentage
@@ -39,18 +39,11 @@ class Dashboard extends Component {
 
     // TODO make sure cards are always the same height
 
-    // TODO PRIORITY FIX QUEY BEING OVERWRITTEN FOR PROGRESS BAR
-    // Change the way the category page is grabbing the tasks.
-    // just make two queries, one to get the category info and one to get the
-    // tasks on their own. Othwerwise the categories>task filter is being 
-    // applied to the category in cache that this page reads from!
-
-
     // Work out how to divide the row
     let division = 'halves'
 
-    if(categories.length > 2 ) 
-      division = categories.length % 3 === 0
+    if(taskLists.length > 2 ) 
+      division = taskLists.length % 3 === 0
         ? 'thirds'
         : 'fourths'
 
@@ -62,25 +55,25 @@ class Dashboard extends Component {
         </SectionHeader>
       </Col>
       <Row>
-        {categories && categories.map((category, i) => (
-          <Col key={category.id} division={division}>
+        {taskLists && taskLists.map((taskList, i) => (
+          <Col key={taskList.id} division={division}>
             <Card
-              onClick={() => Router.pushRoute('list', { slug: category.slug })}
+              onClick={() => Router.pushRoute('tasklist', { slug: taskList.slug })}
               clickable
             >
               <CardInner>
-                <h3>{category.name}</h3>
-                <p>{category.description.length > 100 
-                  ? category.description.substring(0,70) + '...'
-                  : category.description}</p>
+                <h3>{taskList.name}</h3>
+                <p>{taskList.description.length > 100 
+                  ? taskList.description.substring(0,70) + '...'
+                  : taskList.description}</p>
 
                 <span>Tasks Completed</span>
                 <div className="progress">
-                  <span style={{ width: this.calculateProgress(category) }}></span>
+                  <span style={{ width: this.calculateProgress(taskList) }}></span>
                 </div>
               </CardInner>
               <CardFooter>
-                <Link route="list" params={{ slug: category.slug }}>
+                <Link route="tasklist" params={{ slug: taskList.slug }}>
                   <a>View Tasks →</a>
                 </Link>
               </CardFooter>

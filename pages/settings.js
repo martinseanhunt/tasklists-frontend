@@ -1,6 +1,6 @@
 import User from '../components/providers/User'
 import Users from '../components/settings/Users'
-import Categories from '../components/settings/Categories'
+import TaskLists from '../components/settings/TaskLists'
 
 import Col from '../components/styles/grid/Col'
 
@@ -26,7 +26,7 @@ const Settings = () => (
 
           {data.me 
             && ['ADMIN', 'SUPERADMIN'].includes(data.me.role)
-            && <Categories /> }
+            && <TaskLists /> }
         </Col>
       )
     }}

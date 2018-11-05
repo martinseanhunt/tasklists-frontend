@@ -4,17 +4,17 @@ import gql from 'graphql-tag'
 import User from '../components/providers/User'
 import Dashboard from '../components/Dashboard/Dashboard'
 
-// TODO Should tasks be moved in to their own query for each category on the page? 
+// TODO Should tasks be moved in to their own query for each taskList on the page? 
 // I think that probably makes more sense! 
 
-/* BIGQUESTION: would it be better to, from within a progressbar component, get the aggregate of all posts where category = category. Would need to write 2 queries one to get the count of copleted items and one to get the count of total.
+/* BIGQUESTION: would it be better to, from within a progressbar component, get the aggregate of all posts where taskList = taskList. Would need to write 2 queries one to get the count of copleted items and one to get the count of total.
 
 OR : is the below fine? At what point would it become sluggish? 
 */
 
-const ALL_CATEGORIES_QUERY = gql`
-  query ALL_CATEGORIES_QUERY {
-    categories {
+const ALL_TASKLISTS_QUERY = gql`
+  query ALL_TASKLISTS_QUERY {
+    taskLists {
       id
       name
       description
@@ -26,9 +26,9 @@ const ALL_CATEGORIES_QUERY = gql`
   }
 `
 
-// TOdo Rename category to task type
+// DECISION Should we rename taskLists to Lists ?
 
-// TOdo Attatch tasks to category so we can get them when querying categorues
+// TOdo Attatch tasks to TaskList so we can get them when querying TaskList
 
 // TODO improve error
 
@@ -37,7 +37,7 @@ const ALL_CATEGORIES_QUERY = gql`
 const Index = () => (
   <User>
     {({data}) => (
-      <Query query={ALL_CATEGORIES_QUERY}>
+      <Query query={ALL_TASKLISTS_QUERY}>
         {({data, error, loading}) => {
           if (error) return <p>Something went wrong</p>
           if (loading) return <p>Loading...</p>
@@ -45,7 +45,7 @@ const Index = () => (
           return (
             <Dashboard
               me={data.me}
-              categories={data.categories}
+              taskLists={data.taskLists}
             />
           )
         }} 

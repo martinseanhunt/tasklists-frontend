@@ -3,7 +3,7 @@ import gql from 'graphql-tag'
 
 const TASKLIST_QUERY = gql`
   query TASKLIST_QUERY($slug: String!, $excludeStatus: [TaskStatus]) {
-    category(slug: $slug) {
+    taskList(slug: $slug) {
       name
       id
       slug
@@ -18,7 +18,7 @@ const TASKLIST_QUERY = gql`
   }
 `
 
-const Settings = (props) => (
+const TaskList = (props) => (
   <Query 
     query={TASKLIST_QUERY}
     variables={{
@@ -41,4 +41,4 @@ const Settings = (props) => (
   </Query>
 )
 
-export default Settings
+export default TaskList
