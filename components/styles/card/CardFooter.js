@@ -6,6 +6,7 @@ const CardFooter = styled.footer`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-top: 1px solid #EAEDF3;
 
   a {
     line-height: 1.57;

@@ -1,8 +1,11 @@
 import styled from 'styled-components'
 
 const CardInner = styled.div`
-  border-bottom: 1px solid #EAEDF3;
   padding: 25px 30px;
+  display: flex; 
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
   
   h3 {
     font-size: 1.8rem;
@@ -30,6 +33,14 @@ const CardInner = styled.div`
     display: block;
   }
 
+  ${({ centered }) => centered && `
+    text-align: center;
+    
+    p {
+      width: 100%;
+    }
+  `}
+
   .progress {
     margin-top: 10px;
     margin-bottom: 5px;
@@ -48,6 +59,72 @@ const CardInner = styled.div`
       left: -1px;
       border-radius: 2px;
       border: 1px solid #1665d8;
+    }
+  }
+
+  .status {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    height: 4px;
+    width: 90%;
+    display: flex;
+    
+    span {
+      flex: 1;
+      background: #E6E7E8;
+      height: 4px;
+      border-radius: 2px;
+      border: 1px solid #E6E7E8;
+      margin-right: 5px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    &--CREATED {
+      span {
+        &:nth-child(1) {
+          background: #1665d8;
+          border: 1px solid #1665d8;
+        }
+      }
+    }
+
+    &--ASSIGNED {
+      span {
+        &:nth-child(1), &:nth-child(2) {
+          background: #1665d8;
+          border: 1px solid #1665d8;
+        }
+      }
+    }
+
+    &--AWAITINGINPUT {
+      span {
+        &:nth-child(1), &:nth-child(2), &:nth-child(3) {
+          background: #1665d8;
+          border: 1px solid #1665d8;
+        }
+      }
+    }
+
+    &--COMPLETED {
+      span {
+        &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4) {
+          background: #34aa44;
+          border: 1px solid #34aa44;
+        }
+      }
+    }
+
+    &--CLOSED {
+      span {
+        &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4) {
+          background: #e6492d;
+          border: 1px solid #e6492d;
+        }
+      }
     }
   }
 `

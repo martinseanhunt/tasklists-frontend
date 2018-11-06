@@ -1,8 +1,12 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 
+import TaskList from '../components/TaskList/TaskList'
+
+// TODO use fragments for getting task info!
+
 const TASKLIST_QUERY = gql`
-  query TASKLIST_QUERY($slug: String!, $excludeStatus: [TaskStatus]) {
+  query TASKLIST_QUERY($slug: String!) {
     taskList(slug: $slug) {
       name
       id
@@ -10,20 +14,41 @@ const TASKLIST_QUERY = gql`
       description
     }
 
-    tasks(taskListSlug: $slug, excludeStatus: $excludeStatus) {
+    openTasks(taskListSlug: $slug) {
       id
       title
       status
+      description
+      assignedTo {
+        name
+        avatar
+        id
+      }
+    }
+
+    completedTasks(taskListSlug: $slug) {
+      id
+      title
+      status
+      description
+      assignedTo {
+        name
+        avatar
+        id
+      }
     }
   }
 `
 
-const TaskList = (props) => (
+// TODO handle incorrect or missing slug
+
+
+const TaskListPage = (props) => (
   <Query 
     query={TASKLIST_QUERY}
     variables={{
       slug: props.query.slug,
-      excludeStatus: ['COMPLETED', 'CLOSED']
+      excludeStatus: ['CLOSED']
     }}
   >
     {({data, error, loading}) => {
@@ -31,14 +56,14 @@ const TaskList = (props) => (
       if(loading) return <p>loading...</p>
 
       return (
-        <div>
-          {data.tasks && data.tasks.map(task => (
-            <p key={task.id}>{task.title}</p>
-          ))}
-        </div>
+        <TaskList 
+          taskList={data.taskList}
+          openTasks={data.openTasks}
+          completedTasks={data.completedTasks}
+        />
       )
     }}
   </Query>
 )
 
-export default TaskList
+export default TaskListPage

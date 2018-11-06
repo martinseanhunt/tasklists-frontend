@@ -2,8 +2,12 @@ import styled from 'styled-components'
 import Widget from '../widget/Widget'
 
 const Card = styled(Widget)`
-  margin-bottom: 30px;
+  height: 100%;
   transition: all 0.15s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
   &:hover {
     cursor: pointer;

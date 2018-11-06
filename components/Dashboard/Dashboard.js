@@ -54,7 +54,7 @@ class Dashboard extends Component {
           <h2><FontAwesomeIcon icon="list"/>Lists</h2>
         </SectionHeader>
       </Col>
-      <Row>
+      <Row marginBottom>
         {taskLists && taskLists.map((taskList, i) => (
           <Col key={taskList.id} division={division}>
             <Card
@@ -62,14 +62,18 @@ class Dashboard extends Component {
               clickable
             >
               <CardInner>
-                <h3>{taskList.name}</h3>
-                <p>{taskList.description.length > 100 
-                  ? taskList.description.substring(0,70) + '...'
-                  : taskList.description}</p>
-
-                <span>Tasks Completed</span>
-                <div className="progress">
-                  <span style={{ width: this.calculateProgress(taskList) }}></span>
+                <div>
+                  <h3>{taskList.name}</h3>
+                  <p>{taskList.description.length > 100 
+                    ? taskList.description.substring(0,70) + '...'
+                    : taskList.description}</p>
+                </div>
+                
+                <div>
+                  <span>Tasks Completed</span>
+                  <div className="progress">
+                    <span style={{ width: this.calculateProgress(taskList) }}></span>
+                  </div>
                 </div>
               </CardInner>
               <CardFooter>
