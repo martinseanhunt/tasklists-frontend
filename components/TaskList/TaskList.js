@@ -48,7 +48,7 @@ const TaskList = ({ taskList, openTasks, completedTasks }) => {
 
       <Row marginBottom>
         <>
-        <CreateTaskCard division={division} />
+        <CreateTaskCard division={division} taskList={taskList} />
         {openTasks && openTasks.map(task => (
           <TaskCard task={task} division={division} key={task.id}/>
         ))}

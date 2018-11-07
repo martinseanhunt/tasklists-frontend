@@ -26,9 +26,9 @@ const ALL_TASKLISTS_QUERY = gql`
   }
 `
 
-// DECISION Should we rename taskLists to Lists ?
+// DECISION Should I rename taskLists to Lists ?
 
-// TOdo Attatch tasks to TaskList so we can get them when querying TaskList
+// TOdo Attatch tasks to TaskList so I can get them when querying TaskList
 
 // TODO improve error
 

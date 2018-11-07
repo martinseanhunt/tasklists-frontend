@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 const Form = styled.form`
   flex-basis: 50%;
-  padding: 32px 40px;
+  padding: ${({noPadd}) => noPadd ? '0' : '32px 40px'};
 
   label, input {
     display: block;
@@ -31,7 +31,7 @@ const Form = styled.form`
     }
 
     label {
-      font-weight: normal;
+      font-weight: ${({ boldLabel }) => boldLabel ? '500' : 'normal'};
     }
     
     .flex {
@@ -144,7 +144,7 @@ const Form = styled.form`
     }
 
     &:first-of-type {
-      margin-top: 30px;  
+      margin-top: ${({noPadd}) => noPadd ? '0' : '30px'};  
     }
   }
 `

@@ -4,6 +4,8 @@ import { ApolloProvider } from 'react-apollo'
 import withApollo from '../config/withApollo'
 import PageLayout from '../components/layout/PageLayout'
 
+import '@fortawesome/fontawesome-svg-core/styles.css'
+
 class MyApp extends App {  
   static async getInitialProps({ Component, ctx }) {
     let pageProps = {}

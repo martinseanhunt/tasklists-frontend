@@ -20,6 +20,17 @@ const WidgetHeader = styled.header`
     background: none;
     border: none;
   }
+
+  p {
+    color: #9ea0a5;
+    line-height: 1.57;
+    margin: 8px 0 0 0;
+  }
+
+  ${({ notFixed }) => notFixed && `
+    height: auto;
+    padding: 23px 30px;
+  `}
 `
 
 export default WidgetHeader

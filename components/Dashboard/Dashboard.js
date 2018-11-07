@@ -16,7 +16,7 @@ class Dashboard extends Component {
 
     const totalTasks = taskList.tasks.length
     const completedTasks = 
-      taskList.tasks.filter(task => ['COMPLETED', 'CLOSED'].includes(task.status))
+      taskList.tasks.filter(task => ['COMPLETED'].includes(task.status))
       .length
     
     return `calc(${Math.floor(completedTasks*100/totalTasks)}% + 2px)`

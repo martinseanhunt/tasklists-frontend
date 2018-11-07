@@ -5,12 +5,14 @@ import Card from '../styles/card/Card'
 import CardInner from '../styles/card/CardInner'
 import CardFooter from '../styles/card/CardFooter'
 
-console.log(Col)
 // TODO once functionality is somewhat complete make sure 
 // this is all split in to the relevant components and we're not repeating ourselves 
 // from the dashboard.
 
 // TODO progress/status should be its own component
+
+// TODO Have a WAITINGON task status which shows as yellow and on hover tells you
+// The Staff member who's assigned to the last comment that we're waiting on assets etc
 
 const TaskCard = ({ task, division }) => {
   return (
