@@ -1,6 +1,7 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 
+import Container from '../components/styles/grid/Container'
 import TaskList from '../components/TaskList/TaskList'
 
 // TODO use fragments for getting task info!
@@ -44,26 +45,27 @@ const TASKLIST_QUERY = gql`
 
 
 const TaskListPage = (props) => (
-  <Query 
-    query={TASKLIST_QUERY}
-    variables={{
-      slug: props.query.slug,
-      excludeStatus: ['CLOSED']
-    }}
-  >
-    {({data, error, loading}) => {
-      if(error) return <p>This is an error</p>
-      if(loading) return <p>loading...</p>
+  <Container>
+    <Query 
+      query={TASKLIST_QUERY}
+      variables={{
+        slug: props.query.slug    
+      }}
+    >
+      {({data, error, loading}) => {
+        if(error) return <p>This is an error</p>
+        if(loading) return <p>loading...</p>
 
-      return (
-        <TaskList 
-          taskList={data.taskList}
-          openTasks={data.openTasks}
-          completedTasks={data.completedTasks}
-        />
-      )
-    }}
-  </Query>
+        return (
+          <TaskList 
+            taskList={data.taskList}
+            openTasks={data.openTasks}
+            completedTasks={data.completedTasks}
+          />
+        )
+      }}
+    </Query>
+  </Container>
 )
 
 export default TaskListPage

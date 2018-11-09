@@ -9,7 +9,7 @@ import SignOut from '../SignIn/SignOut'
 // TODO Add profile image (gravatar or random Yoga image)
 // on hover show settings and signout
 
-// TODO Add notifications systed and header section
+// TODO Add notifications system
 
 // TODO Add icons
 

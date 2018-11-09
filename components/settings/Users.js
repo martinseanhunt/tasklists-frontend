@@ -20,6 +20,7 @@ const ALL_USERS_QUERY = gql`
       slackHandle
       email
       status
+      avatar
     }
   }
 `

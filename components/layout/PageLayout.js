@@ -22,7 +22,7 @@ const PageLayout = props => (
     <Head>
       <title>Devlists</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-
+      <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
     </Head>
 
     <User>
@@ -46,10 +46,7 @@ const PageLayout = props => (
 )
 
 const Main = styled.main`
-  max-width: 1140px;
-  margin: 0 auto;
   margin-top: 70px;
-  padding-top: 30px;
   text-align: left;
 `
 

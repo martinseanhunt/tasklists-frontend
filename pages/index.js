@@ -1,6 +1,7 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 
+import Container from '../components/styles/grid/Container'
 import User from '../components/providers/User'
 import Dashboard from '../components/Dashboard/Dashboard'
 
@@ -35,23 +36,25 @@ const ALL_TASKLISTS_QUERY = gql`
 // TODO standardise capitalisation in component folder names
 
 const Index = () => (
-  <User>
-    {({data}) => (
-      <Query query={ALL_TASKLISTS_QUERY}>
-        {({data, error, loading}) => {
-          if (error) return <p>Something went wrong</p>
-          if (loading) return <p>Loading...</p>
+  <Container>
+    <User>
+      {({data}) => (
+        <Query query={ALL_TASKLISTS_QUERY}>
+          {({data, error, loading}) => {
+            if (error) return <p>Something went wrong</p>
+            if (loading) return <p>Loading...</p>
 
-          return (
-            <Dashboard
-              me={data.me}
-              taskLists={data.taskLists}
-            />
-          )
-        }} 
-      </Query>
-    )}
-  </User>
+            return (
+              <Dashboard
+                me={data.me}
+                taskLists={data.taskLists}
+              />
+            )
+          }} 
+        </Query>
+      )}
+    </User>
+  </Container>
 )
 
 export default Index

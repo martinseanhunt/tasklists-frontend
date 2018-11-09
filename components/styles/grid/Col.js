@@ -24,6 +24,7 @@ const Col = styled.div`
     flex-shrink: 0;
     flex-grow: 0;
   `}
+
 `
 
 export default Col

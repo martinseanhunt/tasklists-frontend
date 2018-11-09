@@ -1,5 +1,8 @@
 import styled from 'styled-components'
 
+// TODO Seperate form elements in to their own components to avoid
+// Style interference like with react-select etc
+
 const Form = styled.form`
   flex-basis: 50%;
   padding: ${({noPadd}) => noPadd ? '0' : '32px 40px'};
@@ -23,11 +26,11 @@ const Form = styled.form`
   fieldset {
     padding: 0;
     border: none;
-    margin-top: 20px;
+    margin: 20px 0 0 0;
     display: flex;
 
     &.no-margin {
-      margin-top: 0;
+      margin: 0;
     }
 
     label {
@@ -36,17 +39,20 @@ const Form = styled.form`
     
     .flex {
       display: flex;
-      
+      flex-wrap: wrap;
+
       label{
-        margin-top: 0;
+        margin-top: 20px;
         flex-basis: 50%;
         
         &:first-child {
           padding-right: 5px;
+          margin-top: 0;
         }
 
         &:nth-child(2) {
           padding-left: 5px;
+          margin-top: 0;
         }
       }
 
@@ -135,6 +141,19 @@ const Form = styled.form`
     font-weight: 500;
     display: block;
     margin-top: 20px;
+
+    &.hidden {
+      visibility: hidden;
+      height: 0; 
+      overflow: hidden;
+    } 
+    
+    &.inside-header {
+      text-transform: none;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+    }
   
     span {
       display: block;

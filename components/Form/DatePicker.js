@@ -6,26 +6,17 @@ import styled from 'styled-components'
 import 'react-datepicker/dist/react-datepicker.css'
 
 class DatePickerComponent extends Component {
-  state = {
-    date: ''
-  }
-
-  componentDidMount = () => {
-    this.setState({ startDate: moment() })
-  }
-
-  handleChange = (date) => {
-    this.setState({ startDate: date })
-  }
+  componentDidMount = () => this.props.setDate(moment())
 
   render() {
     return (
       <StyledDatePicker animate={this.props.animate}>
         <DatePicker
-          selected={this.state.startDate}
-          onChange={this.handleChange}
+          selected={this.props.date}
+          onChange={this.props.setDate}
           disabled={this.props.disabled}
         />
+        <NoDate disabled={this.props.disabled}>N/A</NoDate>
       </StyledDatePicker>
     )
   }
@@ -37,7 +28,8 @@ const StyledDatePicker = styled.div`
   display: block;
   box-shadow: 0 0 0 rgba(204,169,44, 0.4);
   border-radius: 4px;
-  
+  position: relative;
+  margin-top: 15px;
 
   ${({animate}) => animate && `
     animation: pulse 1s 2;
@@ -82,7 +74,20 @@ const StyledDatePicker = styled.div`
       cursor: default;
     }
   }
-
 `
+
+const NoDate = styled.span`
+  visibility: ${({ disabled }) => disabled ? 'visible' : 'hidden'};
+  position: absolute;
+  top: 2px;
+  left: 7px;
+  display: block;
+  color: #b2b2b2 !important;
+  background: #fff;
+  font-weight: normal;
+  padding: 10px;
+  min-width: 100px;
+  font-size: 1.4rem;
+` 
 
 export default DatePickerComponent
