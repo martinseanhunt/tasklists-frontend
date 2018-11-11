@@ -4,6 +4,10 @@ const Col = styled.div`
   margin: 0 15px;
   flex: 1;
   
+  ${({marginBottom}) => marginBottom && `
+    margin-bottom: 20px;
+  `}
+  
   ${({division}) => division === 'halves' && `
     flex-basis: calc(50% - 30px);
     width: calc(50% - 30px);

@@ -8,7 +8,7 @@ import CardInner from '../styles/card/CardInner'
 import CardIcon from '../styles/card/CardIcon'
 
 const CreateTaskCard = ({ division, taskList }) => (
-  <Col division={division}>
+  <Col division={division} marginBottom>
     <Card
       onClick={() => Router.pushRoute('createTask', { taskListSlug: taskList.slug })}
       clickable
@@ -20,7 +20,7 @@ const CreateTaskCard = ({ division, taskList }) => (
 
         <h3>Create New Task</h3>
         
-        <p>Create a new task in [ListName]</p>
+        <p>Create a new task in {taskList.name}</p>
       </CardInner>
     </Card>
   </Col>

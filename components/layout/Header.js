@@ -27,7 +27,6 @@ const Header = () => (
         </h1>
         <nav>
           <Link href="/"><a>Dashboard</a></Link>
-          <Link href="/create"><a>New Task</a></Link>
           <Link href="/settings"><a>Settings</a></Link>
           <SignOut/>
         </nav>

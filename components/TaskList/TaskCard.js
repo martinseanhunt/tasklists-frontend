@@ -16,7 +16,7 @@ import CardFooter from '../styles/card/CardFooter'
 
 const TaskCard = ({ task, division }) => {
   return (
-    <Col key={task.id} division={division}>
+    <Col key={task.id} division={division} marginBottom>
       <Card
         onClick={() => Router.pushRoute('task', { slug: task.id })}
         clickable

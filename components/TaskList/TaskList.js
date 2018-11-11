@@ -27,7 +27,7 @@ import CreateTaskCard from './CreateTaskCard'
 const TaskList = ({ taskList, openTasks, completedTasks }) => {
   let division = 'halves'
   if((openTasks.length + 1) > 2 ) 
-    division = (openTasks.length + 1) % 3 === 0
+    division = (openTasks.length) % 3 === 0
       ? 'thirds'
       : 'fourths'
 
