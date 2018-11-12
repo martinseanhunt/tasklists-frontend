@@ -1,7 +1,5 @@
 import styled from 'styled-components'
 
-import { DEFAULT_AVATAR } from '../../config/config'
-
 const getInitials = name => 
   name.split(' ').map(n => n[0]).join('')
 
