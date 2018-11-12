@@ -29,8 +29,6 @@ const ALL_TASKLISTS_QUERY = gql`
 
 // DECISION Should I rename taskLists to Lists ?
 
-// TOdo Attatch tasks to TaskList so I can get them when querying TaskList
-
 // TODO improve error
 
 // TODO standardise capitalisation in component folder names

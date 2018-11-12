@@ -140,11 +140,6 @@ class CreateTaskForm extends Component {
   createTask = (createTaskMutation) => {
     // TODO this makes sense to me but not sure it would to others... refactor
 
-    // BIGQUESTION inputt ype from the generated prisma file wants me to send 
-    // taskListField as taskListField: { connect: { id: field.taskListField } }
-    // So I've created a custom input type so I can simply pass the ID. 
-    // Is that the right approach ? 
-
     let { dueDate, customFields } = this.state
     
     customFields = customFields 
