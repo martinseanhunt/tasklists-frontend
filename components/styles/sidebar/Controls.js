@@ -11,6 +11,7 @@ const Controls = styled.div`
 
   button:last-child {
     flex: 2.2;
+    margin-right: 0;
   }
 `
 

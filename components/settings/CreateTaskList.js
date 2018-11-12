@@ -115,7 +115,6 @@ class CreateTaskList extends Component {
                 >X</button>
               </WidgetHeader>
               <WidgetRow 
-                modal
                 ref={(el) => this.scrollableWidget = el} 
               >
                 {error && <p>{error.message}</p>}

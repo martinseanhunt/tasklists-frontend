@@ -1,4 +1,5 @@
 import React from 'react'
+import { Router } from '../../routes'
 
 import Col from '../styles/grid/Col'
 import Card from '../styles/card/Card'
@@ -18,7 +19,7 @@ const TaskCard = ({ task, division }) => {
   return (
     <Col key={task.id} division={division} marginBottom>
       <Card
-        onClick={() => Router.pushRoute('task', { slug: task.id })}
+        onClick={() => Router.pushRoute('task', { id: task.id })}
         clickable
       >
         <CardInner>

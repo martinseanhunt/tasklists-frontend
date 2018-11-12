@@ -7,8 +7,6 @@ import Row from '../styles/grid/Row'
 import TaskCard from './TaskCard'
 import CreateTaskCard from './CreateTaskCard'
 
-// TODO division should really be applied on the ROw
-
 // TODO Ordering and filtering!
 
 // TODO SEARCH
