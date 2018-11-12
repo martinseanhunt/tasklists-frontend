@@ -11,15 +11,23 @@ import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
   calculateProgress = (taskList) => {
-    if(!taskList.tasks) return `0%`
-    if(!taskList.tasks.length) return `0%`
+    if(!taskList.tasks || !taskList.tasks.length) return {
+      width: '0%',
+      noTasks: true
+    }
 
     const totalTasks = taskList.tasks.length
     const completedTasks = 
       taskList.tasks.filter(task => ['COMPLETED'].includes(task.status))
       .length
+
+    const percentage = Math.floor(completedTasks*100/totalTasks)
     
-    return `calc(${Math.floor(completedTasks*100/totalTasks)}% + 2px)`
+    return {
+      width:`calc(${percentage}% + 2px)`,
+      allTasksComplete: taskList.tasks.length && totalTasks === completedTasks,
+      noTasks: percentage === 0
+    }
   }
 
   render() {
@@ -55,35 +63,43 @@ class Dashboard extends Component {
         </SectionHeader>
       </Col>
       <Row marginBottom>
-        {taskLists && taskLists.map((taskList, i) => (
-          <Col key={taskList.id} division={division}>
-            <Card
-              onClick={() => Router.pushRoute('tasklist', { slug: taskList.slug })}
-              clickable
-            >
-              <CardInner>
-                <div>
-                  <h3>{taskList.name}</h3>
-                  <p>{taskList.description.length > 100 
-                    ? taskList.description.substring(0,70) + '...'
-                    : taskList.description}</p>
-                </div>
-                
-                <div>
-                  <span>Tasks Completed</span>
-                  <div className="progress">
-                    <span style={{ width: this.calculateProgress(taskList) }}></span>
+        {taskLists && taskLists.map((taskList, i) => {
+          
+          const progress = this.calculateProgress(taskList)
+
+          return (
+            <Col key={taskList.id} division={division}>
+              <Card
+                onClick={() => Router.pushRoute('tasklist', { slug: taskList.slug })}
+                clickable
+              >
+                <CardInner>
+                  <div>
+                    <h3>{taskList.name}</h3>
+                    <p>{taskList.description.length > 100 
+                      ? taskList.description.substring(0,70) + '...'
+                      : taskList.description}</p>
                   </div>
-                </div>
-              </CardInner>
-              <CardFooter>
-                <Link route="tasklist" params={{ slug: taskList.slug }}>
-                  <a>View Tasks →</a>
-                </Link>
-              </CardFooter>
-            </Card>
-          </Col>
-        ))}
+                  
+                  <div>
+                    <span>Tasks Completed</span>
+                    <div className={`progress progress--${progress.allTasksComplete && 'complete'}`}>
+                      <span style={{ 
+                        width: progress.width, 
+                        display: progress.noTasks ? 'none' : 'block',
+                      }}></span>
+                    </div>
+                  </div>
+                </CardInner>
+                <CardFooter>
+                  <Link route="tasklist" params={{ slug: taskList.slug }}>
+                    <a>View Tasks →</a>
+                  </Link>
+                </CardFooter>
+              </Card>
+            </Col>
+          )}
+        )}
       </Row>
       </>
     )

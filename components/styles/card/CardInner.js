@@ -60,6 +60,14 @@ const CardInner = styled.div`
       border-radius: 2px;
       border: 1px solid #1665d8;
     }
+
+    &--complete {
+      span {
+        background: #34AA44;
+        border-color: #34AA44;
+      }
+    }
+    
   }
 
   .status {
