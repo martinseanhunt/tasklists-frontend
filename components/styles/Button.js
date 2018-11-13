@@ -18,6 +18,14 @@ const Button = styled.button`
     color: #fff;
   `}
 
+  ${props => props.cancel && `
+    box-shadow: 0 1px 1px 0 rgba(22, 29, 37, 0.1), inset 0 2px 0 0 rgba(255, 255, 255, 0.06);
+    border: solid 1px #e6492d;
+    background-image: linear-gradient(to top, #e6492d, #D8442A);
+    color: #fff;
+    margin-left: 10px;
+  `}
+
   ${props => props.secondary && `
     box-shadow: 0 1px 1px 0 rgba(19, 31, 21, 0.1), inset 0 2px 0 0 rgba(255, 255, 255, 0.06);
     border: solid 1px #2d9c3c;

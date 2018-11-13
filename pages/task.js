@@ -1,6 +1,9 @@
 import { Query, Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
+import moment from 'moment'
+import { Link } from '../routes'
+import styled from 'styled-components'
 
 import Row from '../components/styles/grid/Row'
 import Col from '../components/styles/grid/Col'
@@ -8,11 +11,22 @@ import Container from '../components/styles/grid/Container'
 import SidebarRow from '../components/styles/sidebar/SidebarRow'
 import Controls from '../components/styles/sidebar/Controls'
 import Button from '../components/styles/Button'
+import Widget from '../components/styles/widget/Widget'
+import WidgetHeader from '../components/styles/widget/WidgetHeader'
+import WidgetFooter from '../components/styles/widget/WidgetFooter'
+import WidgetRow from '../components/styles/widget/WidgetRow'
 
-import SubHeader from '../components/layout/SubHeader'
 import User from '../components/providers/User'
+import Avatar from '../components/common/Avatar'
+import BreadCrumb from '../components/styles/BreadCrumb'
 
 // TODO design this page
+
+// TODO Change close task terminology to archive task
+
+// TODO limit edit, close re-open etc by permission
+
+// Fix button flash when component is no longer loading but query has not yet been refetched
 
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
@@ -76,43 +90,68 @@ const TaskPage = ({ query }) => (
 
             const { task } = data
             return (
-              <>
-                <SubHeader title={task.taskList.name}>
-                  {/* TODO something on the right side... */}
-                </SubHeader>
-
-                <Container>
-                  <Row>
-                    <Col>
-                      <h1>{task.title}</h1>
-                      <p>Created: {task.createdAt}</p>
-                      <p>Updated: {task.updatedAt}</p>
-                      {task.createdBy && ( <p>Created By {task.createdBy.name}</p> )}
-                      <p>{task.description}</p>
-                      <hr/>
-                      
-                      {task.customFields.length > 0 && (
-                        <>
-                          <h3>Custom Fields</h3>
-                          {task.customFields.map(cf => (
-                            <div key={cf.id}>
-                              {cf.fieldName}: {cf.fieldValue}
-                            </div>
-                          ))}
-                        </>
-                      )}
-                    </Col>
-                    <Col division='fourths'>
-                      <SidebarRow>
-                        <h4>Status</h4>
-                        <p>Current task status:</p>
-                        <strong>{task.status}</strong>
+              <Container>
+                <BreadCrumb>
+                  <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>«{task.taskList.name}</a></Link>
+                </BreadCrumb>
+                <Row>
+                  <Col>
+                    <Widget>
+                      <WidgetHeader noFlex notFixed>
+                        <h1>{task.title}</h1>
+                        <p> 
+                          {task.createdBy.name} created this task on {moment(task.createdAt).format('MMM Do YYYY')}
+                        </p>
                         
+                      </WidgetHeader>
+                      
+                      <TaskMeta>
+                        <div>
+                          <span className="label">Status: </span>  <span>{task.status}</span>
+                        </div>
+
+                        <div>
+                          <span className="label">Due: </span>  <span>{task.due} {task.dueDate && moment(task.dueDate).format('MMM Do YYYY')}</span>
+                        </div>
+
+                        <div>
+                          <span className="label">Assigned to: </span>  
+                          <span>
+                            {task.assignedTo 
+                              ? <Avatar user={task.assignedTo}/>
+                              : 'None'
+                            }
+                            
+                          </span>
+                        </div>
+
+                        {task.customFields.length > 0 && (
+                          task.customFields.map(cf => (
+                            <div key={cf.id}>
+                              <span className="label">{cf.fieldName}:</span> 
+                              <span>{cf.fieldValue}</span>
+                            </div>
+                          ))
+                       )}
+                      </TaskMeta>
+
+                      <WidgetRow>
+                        <p>{task.description}</p>
+                      </WidgetRow>
+
+                      {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
+                      || task.createdBy.id === userData.me.id
+                      || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
+                      && (
                         <Mutation
                           mutation={UPDATE_TASK_STATUS}
                           variables={{
                             id: task.id,
-                            status: 'COMPLETED'
+                            // TODO refactor this and move in to setStatus function
+                            // there are more complicated use cases to account for
+                            status: ['COMPLETED', 'CLOSED'].includes(task.status) 
+                              ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
+                              : 'COMPLETED'
                           }}
                           onCompleted={() => refetch()}
                         >
@@ -120,63 +159,71 @@ const TaskPage = ({ query }) => (
                           if(updateStatus.error) return <p>Oops, something went wrong</p>
 
                           return (
-                            (['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
-                            || task.createdBy.id === userData.me.id
-                            || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
-                              && (
-                                <Controls>
+                              <WidgetFooter>
+                                <div className="controls">
+                                  <Button>
+                                    Edit
+                                  </Button>
+                                  {!['COMPLETED', 'CLOSED'].includes(task.status) && (
+                                    <Button cancel>
+                                      Close Task
+                                    </Button>
+                                  )}
+                                </div>
+                                {['COMPLETED', 'CLOSED'].includes(task.status) ? (
+                                  <Button primary
+                                    onClick={updateTaskStatus}
+                                    disabled={updateStatus.loading}
+                                  >
+                                    Re-Open{updateStatus.loading && 'ing'} Task
+                                  </Button>
+                                ) : (
                                   <Button secondary
                                     onClick={updateTaskStatus}
                                     disabled={updateStatus.loading}
                                   >
-                                    Complete Task
+                                    Complet{updateStatus.loading ? 'ing' : 'e'} Task
                                   </Button>
-                                </Controls>
-                              )
-                          )
-                        }}
-                        
+                                )}
+                                
+                              </WidgetFooter>
+                            ) 
+                          }}
                         </Mutation>
-                        
-                      </SidebarRow>
+                      )
+                    }
+                    </Widget>
+                  </Col>
+                  <Col division='fourths'>
+                   
+                    <SidebarRow>
+                      <h4>Assigned</h4>
+                      <p>This task is assigned to:</p>
+                      <strong>{task.assignedTo ? (
+                        <>
+                          <Avatar user={task.assignedTo} />
+                          {task.assignedTo.name}
+                        </>
+                      ) : <p>None</p>}</strong>
+                    </SidebarRow>
 
-                      <SidebarRow>
-                        <h4>Task Due</h4>
-                        <p>This task is due</p>
-                        <strong>{task.due} </strong>
-                        <strong>{task.dueDate && task.dueDate}</strong>
-                      </SidebarRow>
-                      
-                      <SidebarRow>
-                        <h4>Assigned</h4>
-                        <p>This task is assigned to:</p>
-                        <strong>{task.assignedTo && task.assignedTo.name}</strong>
-                      </SidebarRow>
+                    <SidebarRow>
+                      <h4>Attachments</h4>
+                      <p>Attachments for the task:</p>
+                      {task.assets.length > 0 && (
+                        task.assets.map(a => (
+                          <li key={a.id}>
+                            <a href={a.assetUrl} target="__blank">{a.assetUrl}</a>
+                          </li>
+                        ))
+                      )}
+                    </SidebarRow>
 
-                      <SidebarRow>
-                        <h4>Attachments</h4>
-                        <p>Attachments for the task:</p>
-                        {task.assets.length > 0 && (
-                          task.assets.map(a => (
-                            <li key={a.id}>
-                              <a href={a.assetUrl} target="__blank">{a.assetUrl}</a>
-                            </li>
-                          ))
-                        )}
-                      </SidebarRow>
-
-                      <SidebarRow>
-                        <Controls>
-
-                          <Button>
-                            Edit Task
-                          </Button>
-                        </Controls>
-                      </SidebarRow>
-                    </Col>
-                  </Row>
-                </Container>
-              </>
+                   
+                  </Col>
+                </Row>
+              </Container>
+            
             )
           }}
         </Query>
@@ -186,3 +233,34 @@ const TaskPage = ({ query }) => (
 )
 
 export default TaskPage
+
+const TaskMeta = styled(WidgetRow)`
+  display: flex;
+  padding: 10px 0;
+  margin: 0 30px;
+
+  div {
+    padding: 10px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:last-of-type {
+      border-right: none;
+    }
+
+    span.label {
+      color: #9ea0a5;
+      font-size: 1.3rem;
+      margin-right: 5px;
+
+      &:first-of-type {
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        color: #9ea0a5;
+        font-weight: 500;
+      }
+    }
+  }
+`
