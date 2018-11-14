@@ -10,22 +10,17 @@ import CardInner from '../styles/card/CardInner'
 import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
-  calculateProgress = (taskList) => {
-    if(!taskList.tasks || !taskList.tasks.length) return {
+  calculateProgress = ({totalTaskCount, completedTaskCount}) => {
+    if(!totalTaskCount) return {
       width: '0%',
       noTasks: true
     }
 
-    const totalTasks = taskList.tasks.length
-    const completedTasks = 
-      taskList.tasks.filter(task => ['COMPLETED'].includes(task.status))
-      .length
-
-    const percentage = Math.floor(completedTasks*100/totalTasks)
+    const percentage = Math.floor(completedTaskCount*100/totalTaskCount)
     
     return {
       width:`calc(${percentage}% + 2px)`,
-      allTasksComplete: taskList.tasks.length && totalTasks === completedTasks,
+      allTasksComplete: totalTaskCount && totalTaskCount === completedTaskCount,
       noTasks: percentage === 0
     }
   }

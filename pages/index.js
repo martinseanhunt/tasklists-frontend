@@ -20,9 +20,8 @@ const ALL_TASKLISTS_QUERY = gql`
       name
       description
       slug
-      tasks {
-        status
-      }
+      totalTaskCount
+      completedTaskCount
     }
   }
 `

@@ -28,6 +28,8 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 
 // Fix button flash when component is no longer loading but query has not yet been refetched
 
+// TODO refetch tasklist after changing task status
+
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
     task(id: $id) {
