@@ -6,6 +6,12 @@ const WidgetFooter = styled.footer`
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  ${({isForm}) => isForm && `
+    height: auto;
+    padding: 30px;
+    display: block;
+  `}
 `
 
 export default WidgetFooter

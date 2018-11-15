@@ -19,6 +19,7 @@ import WidgetRow from '../components/styles/widget/WidgetRow'
 import User from '../components/providers/User'
 import Avatar from '../components/common/Avatar'
 import BreadCrumb from '../components/styles/BreadCrumb'
+import Comments from '../components/Task/Comments'
 
 // TODO design this page
 
@@ -29,6 +30,8 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 // Fix button flash when component is no longer loading but query has not yet been refetched
 
 // TODO refetch tasklist after changing task status
+
+// QUESTION Is this query too big? Should I seperate out the comments in to it's own query? 
 
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
@@ -66,6 +69,19 @@ const TASK_QUERY = gql`
           fieldType
         }
         status
+        comments {
+          id
+          comment
+          createdAt
+          assets {
+            id
+          }
+          createdBy {
+            id
+            name
+            avatar
+          }
+        }
     }
   }
 `
@@ -195,6 +211,11 @@ const TaskPage = ({ query }) => (
                       )
                     }
                     </Widget>
+
+                    <Comments 
+                      task={task}
+                      user={userData.me}
+                    />
                   </Col>
                   <Col division='fourths'>
                    
@@ -235,6 +256,7 @@ const TaskPage = ({ query }) => (
 )
 
 export default TaskPage
+export { TASK_QUERY }
 
 const TaskMeta = styled(WidgetRow)`
   display: flex;

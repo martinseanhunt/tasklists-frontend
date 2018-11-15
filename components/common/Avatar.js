@@ -3,9 +3,9 @@ import styled from 'styled-components'
 const getInitials = name => 
   name.split(' ').map(n => n[0]).join('')
 
-const Avatar = ({user, xs}) => {
+const Avatar = ({user, xs, comment}) => {
   return (
-    <AvatarContainer xs={xs}>
+    <AvatarContainer xs={xs} comment={comment}>
       {user.avatar && (
         <img src={user.avatar} alt={user.name} />
       )}
@@ -40,6 +40,11 @@ const AvatarContainer = styled.div`
     width: 25px;
     height: 25px;
     font-size: 1.1rem;
+  `}
+
+  ${({comment}) => comment && `
+    position: absolute;
+    left: -35px;
   `}
 `
 
