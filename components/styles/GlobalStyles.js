@@ -105,12 +105,11 @@ export default createGlobalStyle`
     background: #fbfbfd;
     text-align: center;
     font-size: 1.4rem;
+    padding-bottom: 200px;
   }
 
   * {
     font-family: 'Roboto', sans-serif !important;
   }
-
-
 
 `

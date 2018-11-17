@@ -5,6 +5,7 @@ import propTypes from 'prop-types'
 const CURRENT_USER_QUERY = gql`
   query CURRENT_USER_QUERY {
     me {
+      id
       name
       email
       role

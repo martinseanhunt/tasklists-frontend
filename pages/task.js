@@ -38,50 +38,55 @@ const TASK_QUERY = gql`
     task(id: $id) {
       id
       title
-        description
-        createdBy {
-          name
-          id
-          avatar
-        }
-        assignedTo {
-          name 
-          id
-          avatar
-        }
-        due
-        dueDate
+      description
+      createdBy {
+        name
+        id
+        avatar
+      }
+      assignedTo {
+        name 
+        id
+        avatar
+      }
+      due
+      dueDate
+      assets {
+        id
+        assetUrl
+        assetType
+      }
+      taskList {
+        name
+        slug
+      }
+      createdAt
+      updatedAt
+      customFields {
+        id
+        fieldName
+        fieldValue
+        fieldType
+      }
+      status
+      comments {
+        id
+        comment
+        createdAt
         assets {
           id
-          assetUrl
-          assetType
         }
-        taskList {
+        createdBy {
+          id
           name
-          slug
+          avatar
         }
-        createdAt
-        updatedAt
-        customFields {
-          id
-          fieldName
-          fieldValue
-          fieldType
-        }
-        status
-        comments {
-          id
-          comment
-          createdAt
-          assets {
-            id
-          }
-          createdBy {
-            id
-            name
-            avatar
-          }
-        }
+      }
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
     }
   }
 `
@@ -90,6 +95,30 @@ const UPDATE_TASK_STATUS = gql`
   mutation UPDATE_TASK_STATUS($id: ID!, $status: TaskStatus!) {
     updateTaskStatus(id: $id, status: $status) {
       id
+    }
+  }
+`
+
+const SUBSCRIBE_TO_TASK = gql`
+  mutation SUBSCRIBE_TO_TASK($task: ID!) {
+    subscribeToTask(task: $task) {
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
+    }
+  }
+`
+
+const UNSUBSCRIBE_FROM_TASK = gql`
+  mutation UNSUBSCRIBE_FROM_TASK($task: ID!) {
+    unsubscribeFromTask(task: $task) {
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
     }
   }
 `
@@ -112,6 +141,71 @@ const TaskPage = ({ query }) => (
                 <BreadCrumb>
                   <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>«{task.taskList.name}</a></Link>
                 </BreadCrumb>
+
+                {/* TODO refactor these two operations to use same mutation nad move in to own compoennt  */}
+
+                {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
+                  <Mutation
+                    mutation={UNSUBSCRIBE_FROM_TASK}
+                    variables={{ task: task.id }}
+                    update={(cache, { data: unsubscribeFromTask }) => {
+                      cache.writeQuery({
+                        query: TASK_QUERY,
+                        variables: { id: task.id },
+                        data: { task: {
+                          ...task,
+                          subscribedUsers: [
+                            ...unsubscribeFromTask.unsubscribeFromTask.subscribedUsers
+                          ]
+                        }
+                      }})
+                    }}
+                  >
+                    {(unsubscribeFromTask, {data, error, loading}) => {
+                      if(error) console.log(error)
+                      
+                      return (
+                        <Button
+                          onClick={unsubscribeFromTask}
+                          disabled={loading}
+                        >
+                          Unsubscribe from task
+                        </Button>
+                      )
+                    }}
+                  </Mutation>
+                ) : (
+                  <Mutation
+                    mutation={SUBSCRIBE_TO_TASK}
+                    variables={{ task: task.id }}
+                    update={(cache, { data: subscribeToTask }) => {
+                      cache.writeQuery({
+                        query: TASK_QUERY,
+                        variables: { id: task.id },
+                        data: { task: {
+                          ...task,
+                          subscribedUsers: [
+                            ...subscribeToTask.subscribeToTask.subscribedUsers
+                          ]
+                        }
+                      }})
+                    }}
+                  >
+                    {(subscribeToTask, {data, error, loading}) => {
+                      if(error) console.log(error)
+                      
+                      return (
+                        <Button
+                          onClick={subscribeToTask}
+                          disabled={loading}
+                        >
+                          Subscribe to Task
+                        </Button>
+                      )
+                    }}
+                  </Mutation>
+                )}
+
                 <Row>
                   <Col>
                     <Widget>
