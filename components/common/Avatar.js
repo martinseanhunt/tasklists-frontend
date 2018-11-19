@@ -5,7 +5,7 @@ const getInitials = name =>
 
 const Avatar = ({user, xs, comment}) => {
   return (
-    <AvatarContainer xs={xs} comment={comment}>
+    <AvatarContainer xs={xs} comment={comment} className='avatar'>
       {user.avatar && (
         <img src={user.avatar} alt={user.name} />
       )}

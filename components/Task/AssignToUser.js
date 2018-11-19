@@ -86,3 +86,6 @@ const StyledSingleValue = styled(SingleValue)`
 `
 
 export default AssignToUser
+
+// TODO should probably move where this lives
+export { ALL_USERS_QUERY }

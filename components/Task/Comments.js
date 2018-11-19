@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
-import { Mutation } from 'react-apollo'
+import { Mutation, Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import moment from 'moment'
 import styled from 'styled-components'
 import Textarea from 'react-textarea-autosize'
+import { MentionsInput, Mention } from 'react-mentions'
 
 import { TASK_QUERY } from '../../pages/task'
+import { ALL_USERS_QUERY } from './AssignToUser'
 
 import Widget from '../styles/widget/Widget'
 import WidgetHeader from '../styles/widget/WidgetHeader'
@@ -20,7 +22,7 @@ import Avatar from '../common/Avatar'
 // info so don't always have to update here when updating in task
 
 const CREATE_COMMENT_MUTATION = gql`
-  mutation CREATE_COMMENT_MUTATION($comment: String!, $task: ID!, $notify: ID) {
+  mutation CREATE_COMMENT_MUTATION($comment: String!, $task: ID!, $notify: [ID]) {
     createComment(
       comment: $comment
       task: $task
@@ -50,12 +52,7 @@ const CREATE_COMMENT_MUTATION = gql`
 class Comments extends Component {
   state = {
     value: '',
-    assignedTo: null
   }
-
-  handleUserChange = (e) => this.setState({
-    assignedTo: e ? e.value : null
-  })
 
   onCreateComment = (cache, { data }) => {
     const task = cache.readQuery({
@@ -75,7 +72,31 @@ class Comments extends Component {
       }}
     })
 
-    this.setState({ value: '', assignedTo: null })
+    this.setState({ value: '' })
+  }
+
+  postComment = (createComment, task) => {
+    const { value } = this.state
+
+    // Get all user id's of people mentioned and put in notify array
+    const regexp = /\((.*?)\)/g
+    
+    let notify = []
+    let match = regexp.exec(value)
+
+    while (match != null) {
+      notify = [...notify, match[1]]
+      match = regexp.exec(value)
+    }
+
+    createComment({ 
+      variables: {
+        comment: value,
+        task,
+        notify
+      }
+    })
+
   }
 
   render() {
@@ -95,7 +116,7 @@ class Comments extends Component {
                 <Avatar user={comment.createdBy} comment xs/>
                 <span className="author">{comment.createdBy.name}</span>
                 <span className="date"> {moment(comment.createdAt).fromNow()}</span>
-                <div className="comment">{comment.comment}</div>
+                <div className="comment" dangerouslySetInnerHTML={{ __html: comment.comment }} />
               </Comment>
             ))}
           </WidgetRow>
@@ -104,29 +125,40 @@ class Comments extends Component {
         <WidgetFooter isForm>
           <InputContainer>
             <Avatar user={user}/>
-            <CommentInput 
-              onChange={e => this.setState({ value: e.target.value })}
-              placeholder='Write a comment...'
-              value={this.state.value}
-            />
+            <Query query={ALL_USERS_QUERY}>
+              {(usersPayload) => {
+                if(usersPayload.error) console.error(usersPayload.error)
+
+                // TODO PRIORITY set custom markup to just be @[FULL NAME] 
+                // then set callback function when person is added or removed. 
+
+                // TODO do this differently so I can clean out any html on server side
+
+                return (
+                  <MentionsInput
+                    value={this.state.value}
+                    onChange={e => this.setState({ value: e.target.value })}
+                    placeholder='Write a comment...'
+                    className='mentions-input'
+                  >
+                    <Mention
+                      trigger="@"
+                      data={usersPayload.data.users.map(u => ({ id: u.id, display: u.name }))}
+                    />
+                  </MentionsInput>
+                )
+              }}
+            </Query>
+            
           </InputContainer>
           {this.state.value.length > 0 && (
             <Controls>
               <div className="flex">
-                <span>Notify: </span>
-
-                <SelectUser>
-                  <AssignToUser name="user" onChange={this.handleUserChange}/>
-                </SelectUser>
+                
               </div>
 
               <Mutation 
                 mutation={CREATE_COMMENT_MUTATION}
-                variables={{
-                  comment: this.state.value,
-                  task: task.id,
-                  notify: this.state.assignedTo
-                }}
                 update={this.onCreateComment}
               >
                 {(createComment, { data, error, loading }) => {
@@ -135,7 +167,7 @@ class Comments extends Component {
                   return (
                     <Button
                       disabled={loading}
-                      onClick={createComment}
+                      onClick={() => this.postComment(createComment, task.id)}
                     >
                       Add{loading && 'ing'} Comment
                     </Button>
@@ -155,14 +187,25 @@ const InputContainer = styled.div`
   position: relative;
   padding: 5px 10px 5px 40px;
   
-  div {
+  .avatar {
     position: absolute;
     top: 0;
     left: 0;
   }
+
+  textarea {
+    border: none;
+    outline: none;
+  }
+
+  .mentions-input__highlighter strong {
+    background: #5490E8;
+    opacity: 0.3;
+    padding-right: 3px;
+  }
 `
 
-const CommentInput = styled(Textarea)`
+const CommentInput = styled(MentionsInput)`
   border: none;
   max-height: 700px;
   width: 100%;
@@ -214,6 +257,11 @@ const Comment = styled.div`
   .comment {
     padding-top: 8px;
     color: #6D6E70;
+
+    .user {
+      color: #1665d8;
+      font-weight: 500;
+    }
   }
 
   .date {
