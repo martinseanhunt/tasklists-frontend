@@ -258,9 +258,11 @@ const Comment = styled.div`
     padding-top: 8px;
     color: #6D6E70;
 
-    .user {
+    .mention {
       color: #1665d8;
-      font-weight: 500;
+      &:before {
+        content: "@"
+      }
     }
   }
 
