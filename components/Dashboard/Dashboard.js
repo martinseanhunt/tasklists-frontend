@@ -3,6 +3,8 @@ import { Router, Link } from '../../routes'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import TaskCard from '../TaskList/TaskCard'
+
 import Row from '../styles/grid/Row'
 import Col from '../styles/grid/Col'
 import Card from '../styles/card/Card'
@@ -26,12 +28,8 @@ class Dashboard extends Component {
   }
 
   render() {
-
     // TODO do we really need the user here?
-    const { user, taskLists } = this.props
-
-    // TODO when we can get the count of tasks aassigned to a taskList
-    // Show the number of open tasks and a percentage bar of ompleted tasks
+    const { user, taskLists, myOpenTasks, mySubscriptions } = this.props
 
     // TODO make progress bar it's own component - pass in the percentage
     // as a prop
@@ -96,6 +94,41 @@ class Dashboard extends Component {
           )}
         )}
       </Row>
+      
+      {myOpenTasks && myOpenTasks.length > 0 && (
+        <>
+          <Col>
+            <SectionHeader>
+              <h2><FontAwesomeIcon icon="list"/>Open Tasks Assigned To Me</h2>
+            </SectionHeader>
+          </Col>
+          <Row marginBottom>
+            {myOpenTasks && myOpenTasks.map((task, i) => {
+              return (
+                <TaskCard key={task.id} task={task} division={division}/>
+              )}
+            )}
+          </Row>
+        </>
+      )}
+      
+      {mySubscriptions && mySubscriptions.length > 0 && (
+        <>
+          <Col>
+            <SectionHeader>
+              <h2><FontAwesomeIcon icon="list"/>Open Tasks I'm Subscribed To</h2>
+            </SectionHeader>
+          </Col>
+          <Row marginBottom>
+            {mySubscriptions.map((task, i) => {
+              return (
+                <TaskCard key={task.id} task={task} division={division}/>
+              )}
+            )}
+          </Row>
+        </>
+      )}
+      
       </>
     )
   }

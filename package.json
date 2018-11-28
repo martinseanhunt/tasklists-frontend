@@ -26,6 +26,7 @@
     "nprogress": "^0.2.0",
     "prop-types": "^15.6.2",
     "react": "^16.6.0",
+    "react-adopt": "^0.6.0",
     "react-apollo": "^2.2.4",
     "react-datepicker": "^1.8.0",
     "react-dom": "^16.6.0",

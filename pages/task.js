@@ -33,6 +33,8 @@ import Comments from '../components/Task/Comments'
 
 // QUESTION Is this query too big? Should I seperate out the comments in to it's own query? 
 
+// TODO /  QUESTION I believe that putting the queries at the page level here is stopping the loading state from working correctly because the page isn't loading at all until the query resolves. Should move these queries to the component level
+
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
     task(id: $id) {
@@ -179,6 +181,7 @@ const TaskPage = ({ query }) => (
                     mutation={SUBSCRIBE_TO_TASK}
                     variables={{ task: task.id }}
                     update={(cache, { data: subscribeToTask }) => {
+                      console.log(subscribeToTask)
                       cache.writeQuery({
                         query: TASK_QUERY,
                         variables: { id: task.id },

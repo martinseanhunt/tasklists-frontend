@@ -1,20 +1,17 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
+import { adopt } from 'react-adopt'
 
 import Container from '../components/styles/grid/Container'
 import User from '../components/providers/User'
 import Dashboard from '../components/Dashboard/Dashboard'
 
-// TODO Should tasks be moved in to their own query for each taskList on the page? 
-// I think that probably makes more sense! 
+// TODO alll queries need to be moved to the component level or the page doesn't load until the query copletes
 
-/* BIGQUESTION: would it be better to, from within a progressbar component, get the aggregate of all posts where taskList = taskList. Would need to write 2 queries one to get the count of copleted items and one to get the count of total.
+// TODO how to run these as seperate queries and compose using adopt?
 
-OR : is the below fine? At what point would it become sluggish? 
-*/
-
-const ALL_TASKLISTS_QUERY = gql`
-  query ALL_TASKLISTS_QUERY {
+const DASHBOARD_QUERY = gql`
+  query DASHBOARD_QUERY {
     taskLists {
       id
       name
@@ -23,8 +20,24 @@ const ALL_TASKLISTS_QUERY = gql`
       totalTaskCount
       completedTaskCount
     }
+    myOpenTasks {
+      id
+      title
+      status
+      description
+    }
+    mySubscriptions {
+      id
+      title
+      status
+    }
   }
 `
+
+const Composed = adopt({
+  user: ({ render }) => <User >{render}</User>,
+  dashboard: ({ render }) => <Query query={DASHBOARD_QUERY}>{render}</Query>,
+})
 
 // DECISION Should I rename taskLists to Lists ?
 
@@ -34,23 +47,22 @@ const ALL_TASKLISTS_QUERY = gql`
 
 const Index = () => (
   <Container>
-    <User>
-      {({data}) => (
-        <Query query={ALL_TASKLISTS_QUERY}>
-          {({data, error, loading}) => {
-            if (error) return <p>Something went wrong</p>
-            if (loading) return <p>Loading...</p>
+    <Composed>
+      {({user, dashboard}) => {
 
-            return (
-              <Dashboard
-                me={data.me}
-                taskLists={data.taskLists}
-              />
-            )
-          }} 
-        </Query>
-      )}
-    </User>
+        if (dashboard.error) return <p>Something went wrong</p>
+        if (dashboard.loading) return <p>Loading...</p>
+
+        return (
+          <Dashboard
+            me={user.data.me}
+            taskLists={dashboard.data.taskLists}
+            myOpenTasks={dashboard.data.myOpenTasks}
+            mySubscriptions={dashboard.data.mySubscriptions}
+          />
+        )
+      }}
+    </Composed>
   </Container>
 )
 
