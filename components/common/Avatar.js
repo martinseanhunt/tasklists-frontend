@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 const getInitials = name => 
-  name.split(' ').map(n => n[0]).join('')
+  name ? name.split(' ').map(n => n[0]).join('') : ''
 
 const Avatar = ({user, xs, comment}) => {
   return (
