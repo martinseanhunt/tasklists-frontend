@@ -83,7 +83,7 @@ class CreateTaskForm extends Component {
       return this.setState({ customFields })
     }
 
-    if(['assetUrl', 'assetType'].includes(name)){
+    if(['assetUrl', 'assetType', 'title'].includes(name)){
       const assets = [...this.state.assets]
       assets[id][name] = e.target.value
 
@@ -109,7 +109,8 @@ class CreateTaskForm extends Component {
       assets: [...state.assets, 
         {
           assetUrl: '', 
-          assetType: 'IMAGE'
+          assetType: 'IMAGE',
+          title: ''
         }
       ]
     }), () => {
@@ -283,6 +284,7 @@ class CreateTaskForm extends Component {
                     {assets.map((_, i) => {
                       const assetName = 'assetUrl' + i
                       const assetTypeName = 'assetType' + i
+                      const assetTitleName = 'assetTitle' + i
 
                       return (
                         <fieldset 
@@ -292,6 +294,18 @@ class CreateTaskForm extends Component {
                         >
                           
                           <div className="flex flex--removable">
+                            <label htmlFor={assetTitleName}>{!i && 'Attachment title'}
+                              <input 
+                                name={assetTitleName}
+                                type="text"
+                                placeholder="Title"
+                                onChange={this.handleChange}
+                                value={this.state.assets[i].title}
+                                data-id={i}
+                                data-name='title'
+                              />
+                            </label>
+                            
                             <label htmlFor={assetName}>{!i && 'Attachment URL'}
                               <input 
                                 name={assetName}

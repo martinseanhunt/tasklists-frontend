@@ -25,6 +25,16 @@ const TASKLIST_QUERY = gql`
         avatar
         id
       }
+      createdBy {
+        name
+        avatar
+        id
+      }
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
     }
 
     completedTasks(taskListSlug: $slug) {
@@ -36,6 +46,16 @@ const TASKLIST_QUERY = gql`
         name
         avatar
         id
+      }
+      createdBy {
+        name
+        avatar
+        id
+      }
+      subscribedUsers {
+        id
+        name
+        avatar
       }
     }
   }

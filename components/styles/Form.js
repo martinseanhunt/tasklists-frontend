@@ -61,14 +61,14 @@ const Form = styled.form`
         margin-top: 0;
         
         label {
-          &:first-child {
-            flex-basis:  55%;
-          }
+          flex-basis: 35%;
 
-          &:nth-child(2) {
-            flex-basis: 40%;
+          &:nth-child(3) {
+            flex-basis: 25%;
             flex-grow: 0;
             border: #000;
+            margin-top: 0;
+            padding-left: 10px;
           }
         }
   

@@ -203,15 +203,19 @@ const InputContainer = styled.div`
     opacity: 0.3;
     padding-right: 3px;
   }
-`
 
-const CommentInput = styled(MentionsInput)`
-  border: none;
-  max-height: 700px;
-  width: 100%;
-  display: block;
-  outline: none;
-  resize: none;
+  .mentions-input__suggestions {
+    border: 1px solid #ededed;
+  }
+
+  .mentions-input__suggestions span {
+    display: block;
+    padding: 10px 20px;
+
+    &:hover {
+      background: #ededed;
+    }
+  }
 `
 
 const Controls = styled.div`

@@ -25,11 +25,42 @@ const DASHBOARD_QUERY = gql`
       title
       status
       description
+      createdBy {
+        name
+        avatar
+        id
+      }
+      assignedTo {
+        name
+        avatar
+        id
+      }
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
     }
     mySubscriptions {
       id
       title
       status
+      description
+      createdBy {
+        name
+        avatar
+        id
+      }
+      assignedTo {
+        name
+        avatar
+        id
+      }
+      subscribedUsers {
+        id
+        name
+        avatar
+      }
     }
   }
 `

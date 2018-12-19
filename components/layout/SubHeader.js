@@ -9,13 +9,17 @@ const SubHeader = props => (
       <Container noPadd>
         <Row>
           <SubHeaderCol>
-            <div>
-              <h2>{props.title}</h2>
-            </div>
+            {props.children ? props.children : (
+              <>
+              <div>
+                <h2>{props.title}</h2>
+              </div>
 
-            {props.rightText && (
-              <span>{props.rightText}</span>
-            )}
+              {props.rightText && (
+                <span>{props.rightText}</span>
+              )}
+              </>
+            ) }
           </SubHeaderCol>
         </Row>
       </Container>

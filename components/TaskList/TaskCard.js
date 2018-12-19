@@ -1,6 +1,8 @@
 import React from 'react'
 import { Router } from '../../routes'
 
+import Avatar from '../common/Avatar'
+
 import Col from '../styles/grid/Col'
 import Card from '../styles/card/Card'
 import CardInner from '../styles/card/CardInner'
@@ -44,7 +46,20 @@ const TaskCard = ({ task, division }) => {
           </div>
         </CardInner>
         <CardFooter>
-          Footer
+          <div>
+            <Avatar user={task.createdBy} />
+            {task.assignedTo && task.assignedTo.id !== task.createdBy.id && (
+              <Avatar user={task.assignedTo} />
+            )}
+
+            {task.subscribedUsers && task.subscribedUsers.map(u => 
+                u.id !== task.createdBy.id && u.id !== task.assignedTo.id && (
+                  <Avatar user={u} />
+                  
+                )
+              )
+            }
+          </div>
         </CardFooter>
       </Card>
     </Col>

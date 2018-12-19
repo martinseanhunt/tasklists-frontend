@@ -15,6 +15,7 @@ import Widget from '../components/styles/widget/Widget'
 import WidgetHeader from '../components/styles/widget/WidgetHeader'
 import WidgetFooter from '../components/styles/widget/WidgetFooter'
 import WidgetRow from '../components/styles/widget/WidgetRow'
+import SubHeader from '../components/layout/SubHeader'
 
 import User from '../components/providers/User'
 import Avatar from '../components/common/Avatar'
@@ -31,9 +32,13 @@ import Comments from '../components/Task/Comments'
 
 // TODO refetch tasklist after changing task status
 
+// TODO or - even better, invalidate the cache!
+
 // QUESTION Is this query too big? Should I seperate out the comments in to it's own query? 
 
 // TODO /  QUESTION I believe that putting the queries at the page level here is stopping the loading state from working correctly because the page isn't loading at all until the query resolves. Should move these queries to the component level
+
+// TODO change close / complete to status drop down (less ugly)
 
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
@@ -57,6 +62,7 @@ const TASK_QUERY = gql`
         id
         assetUrl
         assetType
+        title
       }
       taskList {
         name
@@ -139,9 +145,10 @@ const TaskPage = ({ query }) => (
 
             const { task } = data
             return (
-              <Container>
+              <>
+              <SubHeader>
                 <BreadCrumb>
-                  <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>«{task.taskList.name}</a></Link>
+                  <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>« Task List: {task.taskList.name}</a></Link>
                 </BreadCrumb>
 
                 {/* TODO refactor these two operations to use same mutation nad move in to own compoennt  */}
@@ -208,7 +215,9 @@ const TaskPage = ({ query }) => (
                     }}
                   </Mutation>
                 )}
+              </SubHeader>
 
+              <Container>
                 <Row>
                   <Col>
                     <Widget>
@@ -264,6 +273,9 @@ const TaskPage = ({ query }) => (
                             id: task.id,
                             // TODO refactor this and move in to setStatus function
                             // there are more complicated use cases to account for
+
+                            // TODO Refetching is a bit of overkill here... Could do an optimistic
+                            // thing or just manually update the cache on complete
                             status: ['COMPLETED', 'CLOSED'].includes(task.status) 
                               ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
                               : 'COMPLETED'
@@ -280,7 +292,12 @@ const TaskPage = ({ query }) => (
                                     Edit
                                   </Button>
                                   {!['COMPLETED', 'CLOSED'].includes(task.status) && (
-                                    <Button cancel>
+                                    <Button cancel
+                                      onClick={() => updateTaskStatus({ variables: {
+                                        id: task.id,
+                                        status: 'CLOSED'
+                                      }})}
+                                    >
                                       Close Task
                                     </Button>
                                   )}
@@ -333,7 +350,7 @@ const TaskPage = ({ query }) => (
                       {task.assets.length > 0 && (
                         task.assets.map(a => (
                           <li key={a.id}>
-                            <a href={a.assetUrl} target="__blank">{a.assetUrl}</a>
+                            <a href={a.assetUrl} target="__blank">{a.title} ({a.assetType})</a>
                           </li>
                         ))
                       )}
@@ -343,7 +360,7 @@ const TaskPage = ({ query }) => (
                   </Col>
                 </Row>
               </Container>
-            
+              </>
             )
           }}
         </Query>
