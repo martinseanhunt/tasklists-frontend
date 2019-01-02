@@ -294,7 +294,7 @@ const TaskPage = ({ query }) => (
                                     <Button cancel
                                       onClick={() => updateTaskStatus({ variables: {
                                         id: task.id,
-                                        status: 'thiswillerrer'
+                                        status: 'CLOSED'
                                       }})}
                                     >
                                       Clos{updateStatus.loading ? 'ing' : 'e'} Task
