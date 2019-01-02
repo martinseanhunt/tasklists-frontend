@@ -20,6 +20,9 @@ import Controls from '../styles/sidebar/Controls'
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
 
+import { TASKLIST_QUERY } from '../../pages/taskList'
+import { DASHBOARD_QUERY } from '../../pages/index'
+
 // TODO PRIORITY refactor this in to multiple components
 
 // TODO test this with various roles
@@ -145,21 +148,16 @@ class CreateTaskForm extends Component {
     
     customFields = customFields 
       ? customFields
-        .map(field => field.fieldType === 'DATE'
-          ? {
+        .map(field => ({
             ...field,
-            fieldValue: field.fieldValue.format(),
-          }
-          : {
-            ...field,
-          }
+          })
         )
       : null
-
+    
     const task = { 
       ...this.state,
       taskListSlug: this.props.taskList.slug,
-      dueDate: dueDate ? dueDate.format() : null,
+      dueDate: dueDate ? dueDate : null,
       customFields
     }
 
@@ -177,7 +175,16 @@ class CreateTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_TASK_MUTATION}
+        update={this.update}
         onCompleted={this.onCompleted}
+        refetchQueries={[{
+          query: TASKLIST_QUERY,
+          variables: {
+            slug: this.props.taskList.slug
+          }
+        },
+        { query: DASHBOARD_QUERY }
+      ]}
       >
         {( createTask, { error, loading } ) => (
           <Form 

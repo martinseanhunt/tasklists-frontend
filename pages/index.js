@@ -10,6 +10,30 @@ import Dashboard from '../components/Dashboard/Dashboard'
 
 // TODO how to run these as seperate queries and compose using adopt?
 
+const TASKCARD_FRAGMENT = `
+  id
+  title
+  status
+  description
+  createdBy {
+    name
+    avatar
+    id
+  }
+  assignedTo {
+    name
+    avatar
+    id
+  }
+  subscribedUsers {
+    id
+    name
+    avatar
+  }
+  due
+  dueDate
+`
+
 const DASHBOARD_QUERY = gql`
   query DASHBOARD_QUERY {
     taskLists {
@@ -21,46 +45,10 @@ const DASHBOARD_QUERY = gql`
       completedTaskCount
     }
     myOpenTasks {
-      id
-      title
-      status
-      description
-      createdBy {
-        name
-        avatar
-        id
-      }
-      assignedTo {
-        name
-        avatar
-        id
-      }
-      subscribedUsers {
-        id
-        name
-        avatar
-      }
+      ${TASKCARD_FRAGMENT}
     }
     mySubscriptions {
-      id
-      title
-      status
-      description
-      createdBy {
-        name
-        avatar
-        id
-      }
-      assignedTo {
-        name
-        avatar
-        id
-      }
-      subscribedUsers {
-        id
-        name
-        avatar
-      }
+      ${TASKCARD_FRAGMENT}
     }
   }
 `
@@ -98,3 +86,4 @@ const Index = () => (
 )
 
 export default Index
+export { DASHBOARD_QUERY, TASKCARD_FRAGMENT }

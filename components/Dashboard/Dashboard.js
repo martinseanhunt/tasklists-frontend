@@ -28,8 +28,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    // TODO do we really need the user here?
-    const { user, taskLists, myOpenTasks, mySubscriptions } = this.props
+    const { taskLists, myOpenTasks, mySubscriptions } = this.props
 
     // TODO make progress bar it's own component - pass in the percentage
     // as a prop
@@ -45,6 +44,20 @@ class Dashboard extends Component {
 
     if(taskLists.length > 2 ) 
       division = taskLists.length % 3 === 0
+        ? 'thirds'
+        : 'fourths'
+
+    let openTasksDivision = 'halves'
+
+    if(myOpenTasks.length > 2 ) 
+      openTasksDivision = taskLists.length % 3 === 0
+        ? 'thirds'
+        : 'fourths'
+
+    let subscribedTasksDivision = 'halves'
+
+    if(mySubscriptions.length > 2 ) 
+      subscribedTasksDivision = taskLists.length % 3 === 0
         ? 'thirds'
         : 'fourths'
 
@@ -105,7 +118,7 @@ class Dashboard extends Component {
           <Row marginBottom>
             {myOpenTasks && myOpenTasks.map((task, i) => {
               return (
-                <TaskCard key={task.id} task={task} division={division}/>
+                <TaskCard key={task.id} task={task} division={openTasksDivision}/>
               )}
             )}
           </Row>
@@ -122,7 +135,7 @@ class Dashboard extends Component {
           <Row marginBottom>
             {mySubscriptions.map((task, i) => {
               return (
-                <TaskCard key={task.id} task={task} division={division}/>
+                <TaskCard key={task.id} task={task} division={subscribedTasksDivision}/>
               )}
             )}
           </Row>

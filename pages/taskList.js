@@ -4,6 +4,8 @@ import gql from 'graphql-tag'
 import Container from '../components/styles/grid/Container'
 import TaskList from '../components/TaskList/TaskList'
 
+import { TASKCARD_FRAGMENT } from './index'
+
 // TODO use fragments for getting task info!
 
 const TASKLIST_QUERY = gql`
@@ -16,47 +18,11 @@ const TASKLIST_QUERY = gql`
     }
 
     openTasks(taskListSlug: $slug) {
-      id
-      title
-      status
-      description
-      assignedTo {
-        name
-        avatar
-        id
-      }
-      createdBy {
-        name
-        avatar
-        id
-      }
-      subscribedUsers {
-        id
-        name
-        avatar
-      }
+      ${TASKCARD_FRAGMENT}
     }
 
     completedTasks(taskListSlug: $slug) {
-      id
-      title
-      status
-      description
-      assignedTo {
-        name
-        avatar
-        id
-      }
-      createdBy {
-        name
-        avatar
-        id
-      }
-      subscribedUsers {
-        id
-        name
-        avatar
-      }
+      ${TASKCARD_FRAGMENT}
     }
   }
 `
@@ -89,3 +55,4 @@ const TaskListPage = (props) => (
 )
 
 export default TaskListPage
+export { TASKLIST_QUERY }

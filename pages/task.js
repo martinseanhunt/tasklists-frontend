@@ -283,7 +283,6 @@ const TaskPage = ({ query }) => (
                           onCompleted={() => refetch()}
                         >
                         {( updateTaskStatus, updateStatus ) => {
-                          if(updateStatus.error) return <p>Oops, something went wrong</p>
 
                           return (
                               <WidgetFooter>
@@ -295,10 +294,10 @@ const TaskPage = ({ query }) => (
                                     <Button cancel
                                       onClick={() => updateTaskStatus({ variables: {
                                         id: task.id,
-                                        status: 'CLOSED'
+                                        status: 'thiswillerrer'
                                       }})}
                                     >
-                                      Close Task
+                                      Clos{updateStatus.loading ? 'ing' : 'e'} Task
                                     </Button>
                                   )}
                                 </div>

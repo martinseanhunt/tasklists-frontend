@@ -10,7 +10,9 @@ import WidgetRow from '../styles/widget/WidgetRow'
 import WidgetFooter from '../styles/widget/WidgetFooter'
 import Form from '../styles/Form'
 import Button from '../styles/Button'
-import { ALL_TASKLISTS_QUERY } from './TaskLists';
+
+import { ALL_TASKLISTS_QUERY } from './TaskLists'
+import { DASHBOARD_QUERY } from '../../pages/index'
 
 const CREATE_TASKLIST_MUTATION = gql`
   mutation CREATE_TASKLIST_MUTATION(
@@ -101,7 +103,10 @@ class CreateTaskList extends Component {
     return showModal ? (
       <Mutation 
         mutation={CREATE_TASKLIST_MUTATION}
-        refetchQueries={[{ query: ALL_TASKLISTS_QUERY }]}
+        refetchQueries={[
+          { query: ALL_TASKLISTS_QUERY },
+          { query: DASHBOARD_QUERY }
+        ]}
         onCompleted={this.onCompleted}
       >
         {(createTaskList, { error, loading }) => (

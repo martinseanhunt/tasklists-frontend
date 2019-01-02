@@ -17,12 +17,13 @@ class MyApp extends App {
   }
 
   render() {
+
     const { Component, pageProps, apollo } = this.props
 
     return (
       <Container>
         <ApolloProvider client={apollo}>
-          <PageLayout>
+          <PageLayout client={apollo}>
             <Component {...pageProps}/>
           </PageLayout>
         </ApolloProvider>
