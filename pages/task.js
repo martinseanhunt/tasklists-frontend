@@ -22,6 +22,8 @@ import Avatar from '../components/common/Avatar'
 import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
+import { TASKLIST_QUERY } from './taskList'
+
 // TODO design this page
 
 // TODO Change close task terminology to archive task
@@ -188,7 +190,6 @@ const TaskPage = ({ query }) => (
                     mutation={SUBSCRIBE_TO_TASK}
                     variables={{ task: task.id }}
                     update={(cache, { data: subscribeToTask }) => {
-                      console.log(subscribeToTask)
                       cache.writeQuery({
                         query: TASK_QUERY,
                         variables: { id: task.id },
@@ -269,6 +270,12 @@ const TaskPage = ({ query }) => (
                       && (
                         <Mutation
                           mutation={UPDATE_TASK_STATUS}
+                          refetchQueries={[{
+                            query: TASKLIST_QUERY,
+                            variables: {
+                              slug: task.taskList.slug
+                            }
+                          }]}
                           variables={{
                             id: task.id,
                             // TODO refactor this and move in to setStatus function
