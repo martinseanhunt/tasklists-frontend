@@ -23,6 +23,7 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
 import { TASKLIST_QUERY } from './taskList'
+import { DASHBOARD_QUERY } from './index'
 
 // TODO design this page
 
@@ -159,6 +160,7 @@ const TaskPage = ({ query }) => (
                   <Mutation
                     mutation={UNSUBSCRIBE_FROM_TASK}
                     variables={{ task: task.id }}
+                    refetchQueries={[{ query: DASHBOARD_QUERY }]}
                     update={(cache, { data: unsubscribeFromTask }) => {
                       cache.writeQuery({
                         query: TASK_QUERY,
@@ -189,6 +191,7 @@ const TaskPage = ({ query }) => (
                   <Mutation
                     mutation={SUBSCRIBE_TO_TASK}
                     variables={{ task: task.id }}
+                    refetchQueries={[{ query: DASHBOARD_QUERY }]}
                     update={(cache, { data: subscribeToTask }) => {
                       cache.writeQuery({
                         query: TASK_QUERY,
@@ -270,12 +273,15 @@ const TaskPage = ({ query }) => (
                       && (
                         <Mutation
                           mutation={UPDATE_TASK_STATUS}
-                          refetchQueries={[{
-                            query: TASKLIST_QUERY,
-                            variables: {
-                              slug: task.taskList.slug
-                            }
-                          }]}
+                          refetchQueries={[
+                            {
+                              query: TASKLIST_QUERY,
+                              variables: {
+                                slug: task.taskList.slug
+                              }
+                            },
+                            { query: DASHBOARD_QUERY }
+                          ]}
                           variables={{
                             id: task.id,
                             // TODO refactor this and move in to setStatus function
