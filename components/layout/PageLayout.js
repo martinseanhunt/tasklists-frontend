@@ -9,6 +9,7 @@ import GlobalStyles from '../styles/GlobalStyles'
 
 import User from '../providers/User'
 import Header from './Header'
+import Sidebar from './Sidebar'
 import ErrorHandler from './ErrorHandler'
 import SignIn from '../SignIn/SignIn'
 import Icons from './Icons'
@@ -34,6 +35,7 @@ const PageLayout = props => (
         if(data.me) return (
           <Main>
             <ErrorHandler client={props.client}/>
+            <Sidebar />
             <Header />
             {props.children}
           </Main>

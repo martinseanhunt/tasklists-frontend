@@ -51,6 +51,7 @@ const HeaderStyles = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-left: 330px;
   
   h1 {
     font-size: 1.6rem;
