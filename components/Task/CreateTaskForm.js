@@ -22,6 +22,7 @@ import AssignToUser from './AssignToUser'
 
 import { TASKLIST_QUERY } from '../../pages/taskList'
 import { DASHBOARD_QUERY } from '../../pages/index'
+import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
 
 // TODO PRIORITY refactor this in to multiple components
 
@@ -37,7 +38,7 @@ const CREATE_TASK_MUTATION = gql`
   mutation CREATE_TASK_MUTATION(
     $title: String!
     $description: String!
-    $due: TaskDue!
+    $due: TaskDue
     $dueDate: String
     $assignedTo: String
     $customFields: [CreateRelatedCustomField]
@@ -64,9 +65,10 @@ const CREATE_TASK_MUTATION = gql`
 
 class CreateTaskForm extends Component {
   state = {
-    due: 'WHENPOSSIBLE',
+    due: null,
     dateDisabled: true,
     dueDate: null,
+    priority: 'LOW',
     title: '',
     description: '',
     assets: [],
@@ -103,6 +105,10 @@ class CreateTaskForm extends Component {
 
   handleUserChange = (e) => this.setState({
     assignedTo: e ? e.value : null
+  })
+
+  handlePriorityChange = (e) => this.setState({
+    priority: e ? e.value : null
   })
 
   handleDueChange = (e) => this.setState({
@@ -147,7 +153,7 @@ class CreateTaskForm extends Component {
   createTask = (createTaskMutation) => {
     // TODO this makes sense to me but not sure it would to others... refactor
 
-    let { dueDate, customFields } = this.state
+    let { dueDate, customFields, due } = this.state
     
     customFields = customFields 
       ? customFields
@@ -160,6 +166,7 @@ class CreateTaskForm extends Component {
     const task = { 
       ...this.state,
       taskListSlug: this.props.taskList.slug,
+      due: due ? due : null,
       dueDate: dueDate ? dueDate : null,
       customFields
     }
@@ -186,7 +193,8 @@ class CreateTaskForm extends Component {
             slug: this.props.taskList.slug
           }
         },
-        { query: DASHBOARD_QUERY }
+        { query: DASHBOARD_QUERY },
+        { query: TASKLISTS_QUERY }
       ]}
       >
         {( createTask, { error, loading } ) => (
@@ -385,16 +393,12 @@ class CreateTaskForm extends Component {
                 <SidebarRow>
                   <fieldset className="no-margin">
                     <label htmlFor="due">Task Due</label>
-                    <p>Set priority level or due date</p>
+                    <p>Set task to be due by, or on, date</p>
                       <Select 
                         options={[
                           {
-                            value: 'WHENPOSSIBLE',
-                            label: 'When Possible',
-                          },
-                          {
-                            value: 'ASAP',
-                            label: 'ASAP (priority)',
+                            value: '',
+                            label: 'No Due Date',
                           },
                           {
                             value: 'BYDATE',
@@ -407,18 +411,52 @@ class CreateTaskForm extends Component {
                         ]} 
                         onChange={this.handleDueChange}
                         name="due"
-                        placeholder={'When Possible'}
+                        placeholder={'No Due Date'}
                       />
+                  </fieldset>
 
-                      <label htmlFor="date" className="hidden">Date:</label>
-                      {!dateDisabled && (
-                        <DatePicker 
-                          animate={!dateDisabled}
-                          disabled={dateDisabled}
-                          date={dueDate}
-                          setDate={this.setDate}
-                        />
-                      )}
+                  <label htmlFor="date" className="hidden">Date:</label>
+                    {!dateDisabled && (
+                      <DatePicker 
+                        animate={!dateDisabled}
+                        disabled={dateDisabled}
+                        date={dueDate}
+                        setDate={this.setDate}
+                      />
+                    )}
+                </SidebarRow>
+
+                <SidebarRow>
+                  <fieldset className="no-margin">
+                    <label htmlFor="due">Priority Level</label>
+                    <p>Set priority</p>
+                      <Select 
+                        options={[
+                          {
+                            value: 'LOWEST',
+                            label: 'Lowest',
+                          },
+                          {
+                            value: 'LOW',
+                            label: 'Low',
+                          },
+                          {
+                            value: 'MEDIUM',
+                            label: 'Medium',
+                          },
+                          {
+                            value: 'HIGH',
+                            label: 'High',
+                          },
+                          {
+                            value: 'URGENT',
+                            label: 'Urgent',
+                          },
+                        ]} 
+                        onChange={this.handlePriorityChange}
+                        name="priority"
+                        placeholder={'Low'}
+                      />
                   </fieldset>
                 </SidebarRow>
                 

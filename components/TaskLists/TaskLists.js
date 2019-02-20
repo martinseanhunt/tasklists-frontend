@@ -5,12 +5,7 @@ import styled from 'styled-components'
 import { Router, Link } from '../../routes'
 import { withRouter } from 'next/router'
 
-const alphaHex = (hex) => {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result 
-    ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, 0.08)` 
-    : null
-}
+import alphaHex from '../../utils/alphaHex'
 
 const TASKLISTS_QUERY = gql`
   query TASKLISTS_QUERY {
@@ -91,21 +86,21 @@ class TaskLists extends Component {
 }
 
 const ListItem = styled.div`
-  padding: 15px 30px;
+  padding: 15px 25px;
   display: flex;
   align-items: center;
 
   &:hover {
     background: ${props => props.colorAlpha};
     border-left: 3px solid ${props => props.color};
-    padding-left: 27px;
+    padding-left: 22px;
     cursor: pointer;
   }
 
   ${props => props.urlSlug === props.listItemSlug && `
     background: ${props.colorAlpha};
     border-left: 3px solid ${props.color};
-    padding-left: 27px;
+    padding-left: 22px;
   `}
 
   .progress {

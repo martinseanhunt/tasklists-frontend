@@ -22,7 +22,7 @@ import CardFooter from '../styles/card/CardFooter'
 // The Staff member who's assigned to the last comment that we're waiting on assets etc
 
 const dueTypeMap = {
-  ASAP: 'Due ASAP (priority)',
+  ASAP: 'Due ASAP',
   WHENPOSSIBLE: 'Due when possible',
   BYDATE: 'Due by ',
   ONDATE: 'Due on '

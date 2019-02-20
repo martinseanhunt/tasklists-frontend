@@ -26,7 +26,7 @@ const SidebarContainer = styled.div`
   h2 {
     font-size: 12px;
     font-weight: 500;
-    padding: 20px 30px 5px 30px;
+    padding: 20px 25px 5px 25px;
     color: #9EA0A5;
     text-transform: uppercase;
   }

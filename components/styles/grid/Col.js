@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 const Col = styled.div`
-  margin: 0 30px;
+  margin: 0 25px 0 30px;
   flex: 1;
   
   ${({marginBottom}) => marginBottom && `

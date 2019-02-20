@@ -30,11 +30,14 @@ const TASKCARD_FRAGMENT = `
     name
     avatar
   }
+  createdAt
   due
   dueDate
+  priority
   taskList {
     name
     slug
+    color
   }
 `
 

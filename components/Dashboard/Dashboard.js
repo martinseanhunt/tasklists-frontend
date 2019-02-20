@@ -3,7 +3,7 @@ import { Router, Link } from '../../routes'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import TaskCard from '../TaskList/TaskCard'
+import TaskListItem from '../TaskList/TaskListItem'
 
 import Row from '../styles/grid/Row'
 import Col from '../styles/grid/Col'
@@ -12,81 +12,53 @@ import CardInner from '../styles/card/CardInner'
 import CardFooter from '../styles/card/CardFooter'
 
 class Dashboard extends Component {
-  calculateProgress = ({totalTaskCount, completedTaskCount}) => {
-    if(!totalTaskCount) return {
-      width: '0%',
-      noTasks: true
-    }
-
-    const percentage = Math.floor(completedTaskCount*100/totalTaskCount)
-    
-    return {
-      width:`calc(${percentage}% + 2px)`,
-      allTasksComplete: totalTaskCount && totalTaskCount === completedTaskCount,
-      noTasks: percentage === 0
-    }
-  }
 
   render() {
     const { taskLists, myOpenTasks, mySubscriptions } = this.props
 
-    // TODO make progress bar it's own component - pass in the percentage
-    // as a prop
-
-    // TODO allow user to toggle between list and card view
-
-    // TODO allow an admin to create a list from this page
-
-    // TODO make sure cards are always the same height
-
-    // Work out how to divide the row
-    let openTasksDivision = 'halves'
-
-    if(myOpenTasks.length > 2 ) 
-      openTasksDivision = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
-    let subscribedTasksDivision = 'halves'
-
-    if(mySubscriptions.length > 2 ) 
-      subscribedTasksDivision = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
     return (
       <>
       {myOpenTasks && myOpenTasks.length > 0 && (
-        <>
-          <Col>
-            <SectionHeader>
-              <h2><FontAwesomeIcon icon="list"/>Open Tasks Assigned To Me</h2>
-            </SectionHeader>
-          </Col>
-          <Row marginBottom>
-            {myOpenTasks && myOpenTasks.map((task, i) => {
-              return (
-                <TaskCard key={task.id} task={task} division={openTasksDivision}/>
-              )}
-            )}
-          </Row>
-        </>
+        <Col>
+          <SectionHeader>
+            <h2><FontAwesomeIcon icon="list"/>Open Tasks Assigned To Me</h2>
+            <Headings>
+              <span>Creator</span>
+              <span>Assignee</span>
+              <span>Status</span>
+              <span>Created</span>
+              <span>Due</span>
+              <span>Priority</span>
+            </Headings>
+          </SectionHeader>
+
+          {myOpenTasks && myOpenTasks.map((task, i) => (
+            <TaskListItem key={task.id} task={task}/>
+          ))}
+        </Col>
       )}
-      
+      <br/>
+      <br/><br/><br/>
       {mySubscriptions && mySubscriptions.length > 0 && (
         <>
           <Col>
             <SectionHeader>
               <h2><FontAwesomeIcon icon="list"/>Open Tasks I'm Subscribed To</h2>
+              <Headings>
+                <span>Creator</span>
+                <span>Assignee</span>
+                <span>Status</span>
+                <span>Created</span>
+                <span>Due</span>
+                <span>Priority</span>
+              </Headings>
             </SectionHeader>
+         
+            {mySubscriptions.map((task, i) => (
+              <TaskListItem key={task.id} task={task} />
+            ))}
+
           </Col>
-          <Row marginBottom>
-            {mySubscriptions.map((task, i) => {
-              return (
-                <TaskCard key={task.id} task={task} division={subscribedTasksDivision}/>
-              )}
-            )}
-          </Row>
         </>
       )}
       
@@ -95,9 +67,12 @@ class Dashboard extends Component {
   }
 }
 
-const SectionHeader = styled.div`
-  padding: 30px 0;
+const SectionHeader = styled.div` 
+  padding: 0 0 10px 0;
+  margin: 0 0 30px 0;
   position: relative;
+  display: flex;
+  border-bottom 1px solid #eaedf3;
   
   h2 {
     color: #3e3f42;
@@ -108,7 +83,8 @@ const SectionHeader = styled.div`
     z-index: 999;
     position: relative;
     display: inline;
-    padding-right: 20px;
+    width: 350px;
+    min-width: 218px;
 
     svg {
       font-size: 1.4rem;
@@ -116,18 +92,35 @@ const SectionHeader = styled.div`
       color: #9ea0a5;
     }
   }
+`
 
-  &:after {
-    position: absolute;
-    width: 100%;
-    height: 1px;
+const Headings = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  text-align: center;
+  align-items: flex-end;
+
+  span {
+    color: #9ea0a5;
+    text-transform: uppercase;
+    font-size: 11px;
+    text-align: center;
     display: block;
-    background: #eaedf3;
-    content: "";
-    top: 50%;
-    left: 0;
-  }
+    flex: 1;
+    min-width: 70px;
 
+    &:first-of-type {
+      width: 90px;
+      flex: 0 1 90px;
+    }
+
+    &:nth-of-type(2) {
+      width: 90px;
+      flex: 0 1 90px;
+    }
+
+  }
 `
 
 export default Dashboard

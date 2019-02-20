@@ -41,7 +41,7 @@ const HeaderStyles = styled.header`
   background: #fff;
   border-bottom: 1px solid #eaedf2;
   text-align: left;
-  padding: 0 30px;
+  padding: 0 25px;
   position: fixed;
   width: 100%;
   top:0;
