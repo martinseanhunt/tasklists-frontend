@@ -5,6 +5,13 @@ import styled from 'styled-components'
 import { Router, Link } from '../../routes'
 import { withRouter } from 'next/router'
 
+const alphaHex = (hex) => {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result 
+    ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, 0.08)` 
+    : null
+}
+
 const TASKLISTS_QUERY = gql`
   query TASKLISTS_QUERY {
     taskLists {
@@ -14,6 +21,7 @@ const TASKLISTS_QUERY = gql`
       slug
       totalTaskCount
       completedTaskCount
+      color
     }
   }
 `
@@ -38,13 +46,15 @@ class TaskLists extends Component {
     <Query query={TASKLISTS_QUERY}>
       {({data, loading}) => {
         if(loading) return <p>Loading</p>
-        
+
         return (
           <>
             <div>
               {data.taskLists && data.taskLists.map((taskList, i) => {
                 
                 const progress = this.calculateProgress(taskList)
+                const listColor = taskList.color || '#6758F3'
+                const listColorAlpha = alphaHex(taskList.color) || alphaHex('#6758F3')
 
                 return (
                   <ListItem
@@ -52,8 +62,12 @@ class TaskLists extends Component {
                     urlSlug={this.props.router.query.slug || this.props.router.query.taskListSlug}
                     listItemSlug={taskList.slug}
                     key={taskList.slug}
+                    color={listColor}
+                    colorAlpha={listColorAlpha}
                   >
-                    <Icon>{taskList.name.split(' ').map((word, i) => i < 2 ? word[0] : null).join('')}</Icon>
+                    <Icon  color={listColor}>
+                      {taskList.name.split(' ').map((word, i) => i < 2 ? word[0] : null).join('')}
+                    </Icon>
                     <Content>
                       <h3>{taskList.name}</h3>
                       
@@ -82,16 +96,16 @@ const ListItem = styled.div`
   align-items: center;
 
   &:hover {
-    background: #ECEAF8;
-    border-left: 3px solid #6758F3;
+    background: ${props => props.colorAlpha};
+    border-left: 3px solid ${props => props.color};
     padding-left: 27px;
     cursor: pointer;
   }
 
   ${props => props.urlSlug === props.listItemSlug && `
-    background: #ECEAF8;
-    border-left: 3px solid #6758F3;
-    padding-left: 27px;  
+    background: ${props.colorAlpha};
+    border-left: 3px solid ${props.color};
+    padding-left: 27px;
   `}
 
   .progress {
@@ -104,13 +118,13 @@ const ListItem = styled.div`
     margin-bottom: 1px;
     
     span {
-      background: #6758F3;
+      background: ${props => props.color};
       height: 4px;
       position: relative;
       top: -1px;
       left: -1px;
       border-radius: 2px;
-      border: 1px solid #6758F3;
+      border: 1px solid ${props => props.color};
     }
 
     &--complete {
@@ -125,7 +139,7 @@ const ListItem = styled.div`
 
 const Icon = styled.div`
   border-radius: 3px;
-  background: #6758F3;
+  background: ${props => props.color};
   width: 38px;
   height: 38px;
   display: flex;
@@ -153,3 +167,4 @@ const Content = styled.div`
 `
 
 export default withRouter(TaskLists)
+export { TASKLISTS_QUERY }

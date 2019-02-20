@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
 import styled from 'styled-components'
+import { CirclePicker } from 'react-color'
 
 import ModalContainer from '../styles/modal/ModalContainer'
 import ModalInner from '../styles/modal/ModalInner'
@@ -12,18 +13,20 @@ import Form from '../styles/Form'
 import Button from '../styles/Button'
 
 import { ALL_TASKLISTS_QUERY } from './TaskLists'
-import { DASHBOARD_QUERY } from '../../pages/index'
+import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
 
 const CREATE_TASKLIST_MUTATION = gql`
   mutation CREATE_TASKLIST_MUTATION(
     $name: String!, 
     $description: String!, 
     $taskListFields: [TaskListFieldCreateWithoutTaskListInput]
+    $color: String
   ) {
     createTaskList(
       name: $name
       description: $description
       taskListFields: $taskListFields
+      color: $color
     ){
       name
       description
@@ -47,7 +50,8 @@ class CreateTaskList extends Component {
   state = {
     name: '',
     description: '',
-    taskListFields: []
+    taskListFields: [],
+    color: '#6758F3'
   }
 
   handleChange = e => {
@@ -63,11 +67,14 @@ class CreateTaskList extends Component {
     this.setState({ [e.target.name]: e.target.value })
   }
 
+  handleColorChange = color => this.setState({ color: color.hex })
+
   onCompleted = () => {
     this.setState({
       name: '',
       description: '',
-      taskListFields: [{fieldName: '', fieldType: 'STRING'}]
+      taskListFields: [{fieldName: '', fieldType: 'STRING'}],
+      color: '#6758F3'
     })
 
     this.props.closeModal()
@@ -98,14 +105,14 @@ class CreateTaskList extends Component {
 
   render() {
     const { showModal, closeModal } = this.props
-    const { name, description, taskListFields } = this.state
+    const { name, description, taskListFields, color } = this.state
 
     return showModal ? (
       <Mutation 
         mutation={CREATE_TASKLIST_MUTATION}
         refetchQueries={[
           { query: ALL_TASKLISTS_QUERY },
-          { query: DASHBOARD_QUERY }
+          { query: TASKLISTS_QUERY }
         ]}
         onCompleted={this.onCompleted}
       >
@@ -207,6 +214,18 @@ class CreateTaskList extends Component {
                     </Button>
                   </AddNew>
 
+                  <StyledPicker>
+                    <label htmlFor="color">Color
+                      <span className='instructions'>Used for some list specific styling elements</span>
+                      <CirclePicker
+                        onChangeComplete={ this.handleColorChange }
+                        color={this.state.color}
+                        colors={["#6758F3", "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffc107", "#ff9800", "#ff5722", "#795548", "#607d8b"]}
+                        width={'100%'}
+                      />
+                    </label>
+                  </StyledPicker>
+
                 </UserForm>
               </WidgetRow>
     
@@ -249,6 +268,21 @@ const AddNew = styled.div`
   padding-top: 20px;
   text-align: right;
   margin-bottom: 10px;
+`
+
+const StyledPicker = styled.div`
+  .instructions {
+    padding: 10px 0 15px 0;
+  }
+
+  label span {
+    padding-top: 0;
+  }
+
+  span div span div {
+    width: 28px !important;
+    height: 28px !important;
+  }
 `
 
 export default CreateTaskList

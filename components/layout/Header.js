@@ -47,7 +47,7 @@ const HeaderStyles = styled.header`
   top:0;
   left: 0;
   height: 70px;
-  z-index: 99999;
+  z-index: 9998;
   display: flex;
   align-items: center;
   justify-content: space-between;

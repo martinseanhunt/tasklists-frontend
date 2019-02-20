@@ -20,7 +20,7 @@ const SidebarContainer = styled.div`
   height: 100vh;
   border-right: 1px solid #eaedf2;
   background: #fff;
-  z-index: 9999;
+  z-index: 9997;
   padding-top: 70px;
 
   h2 {
