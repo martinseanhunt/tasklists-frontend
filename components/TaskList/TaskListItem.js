@@ -28,18 +28,42 @@ const statusMap = {
   ASSIGNED: 'Assigned',
   AWAITINGINPUT: 'Awaiting Input',
   AWAITINGASSETS: 'Awaiting Assets',
-  AWAITINGFEEDBACK: 'Awaiting Assets',
+  AWAITINGFEEDBACK: 'Awaiting Feedback',
   INPROGRESS: 'In Progress',
   COMPLETED: 'Completed', 
   CLOSED: 'Closed',
   CANCELLED: 'Cancelled'
 }
 
-const TaskListItem = ({ task, division }) => { console.log(task)
+const statusColorMap = {
+  CREATED: '#1665D8',
+  ASSIGNED: '#6758F3',
+  AWAITINGINPUT: '#F6AB2F',
+  AWAITINGASSETS: '#E6492D',
+  AWAITINGFEEDBACK: '#F6AB2F',
+  INPROGRESS: '#FACF55',
+  COMPLETED: '#34AA44', 
+  CLOSED: '#000',
+  CANCELLED: '#000'
+}
+
+const priorityColorMap = {
+  HIGH: '#FACF55',
+  URGENT: '#E6492D'
+}
+
+const dateColor = (date) => {
+  if (!date) return null
+  if(moment().isAfter(date)) return '#E6492D'
+  if(moment().diff(date, 'days') < 3) return '#F6AB2F'
+  return null
+}
+
+const TaskListItem = ({ task, division }) => {
   return (
     <TaskListItemContainer
       onClick={() => Router.pushRoute('taskWithSlug', { id: task.id, taskListSlug: task.taskList.slug })}
-      color={task.taskList.color}
+      color={statusColorMap[task.status]}
     >
       <Item>{task.title}</Item>
       <Item avatar>
@@ -54,7 +78,9 @@ const TaskListItem = ({ task, division }) => { console.log(task)
         {statusMap[task.status]}
       </Item>
       <Item>{moment(task.createdAt).format('MMM Do YYYY')}</Item>
-      <Item> 
+      <Item  
+        highlight={dateColor(task.dueDate)}
+      > 
         {task.due ? (
           <>
            {dueTypeMap[task.due]}
@@ -64,7 +90,11 @@ const TaskListItem = ({ task, division }) => { console.log(task)
         ) : '-'}
        
       </Item>
-      <Item>{task.priority ? task.priority.toLowerCase() : '-'}</Item>
+      <Item
+        highlight={priorityColorMap[task.priority] || null}
+      >
+        {task.priority ? task.priority.toLowerCase() : '-'}
+      </Item>
     </TaskListItemContainer>
   )
 }
@@ -82,7 +112,9 @@ const TaskListItemContainer = styled.ul`
 
   &:nth-of-type(2n) { background: #fcfcfc; }
 
-  &:hover { background: ${props => alphaHex(props.color, 0.03)}; }
+  &:hover { 
+    background: ${props => alphaHex(props.color, 0.03)}; 
+  }
 `
 
 const Item = styled.li`
@@ -94,12 +126,24 @@ const Item = styled.li`
   align-items: center;
   justify-content: center;
   text-transform: capitalize;
-  font-size: 12px;
+  font-size: 13px;
   min-width: 70px;
 
   ${props => props.avatar && `
     width: 90px;
     flex: 0 1 90px;
+  `}
+
+  ${props => props.status && `
+    background: ${alphaHex(statusColorMap[props.status], 0.85)};
+    font-weight: 500;
+    color: #fff;
+  `}
+
+  ${props => props.highlight && `
+    background: ${alphaHex(props.highlight, 0.8)};
+    font-weight: 500;
+    color: #fff;
   `}
 
   &:first-of-type{
@@ -125,52 +169,3 @@ const DueInfo = styled.div`
 `
 
 export default TaskListItem
-
-
-
-/*
-
-const thing = (
-<div>
-        <DueInfo bold={['ASAP'].includes(task.due)}>
-          {dueTypeMap[task.due]}
-          {['BYDATE', 'ONDATE'].includes(task.due) && 
-            moment(task.dueDate).format('MMM Do YYYY')}
-        </DueInfo>
-      </div>
-
-      <div>
-        <div>
-          
-
-          <h3>{task.title}</h3>
-          
-          {task.description && (
-            <p>{task.description.length > 100 
-              ? task.description.substring(0,70) + '...'
-              : task.description}</p>
-          )}
-        </div>
-        
-        <div>
-          <span>Status</span>
-          <div className={`status status--${task.status}`}>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div>
-          
-          
-
-          {(task.subscribedUsers.length - 2) > 0 && `and ${task.subscribedUsers.length - 2} more...`}
-        </div>
-        
-      </div>
-)
-
-*/

@@ -82,6 +82,7 @@ const SectionHeader = styled.div`
     background: #fbfbfd;
     z-index: 999;
     position: relative;
+    top: 1px;
     display: inline;
     width: 350px;
     min-width: 218px;

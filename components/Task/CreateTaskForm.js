@@ -40,6 +40,7 @@ const CREATE_TASK_MUTATION = gql`
     $description: String!
     $due: TaskDue
     $dueDate: String
+    $priority: TaskPriority
     $assignedTo: String
     $customFields: [CreateRelatedCustomField]
     $taskListSlug: String!
@@ -54,6 +55,7 @@ const CREATE_TASK_MUTATION = gql`
       customFields: $customFields
       taskList: $taskListSlug
       assets: $assets
+      priority: $priority
     ){
       id
       taskList{
@@ -107,7 +109,7 @@ class CreateTaskForm extends Component {
     assignedTo: e ? e.value : null
   })
 
-  handlePriorityChange = (e) => this.setState({
+  handlePriorityChange = (e) => console.log(e.value) || this.setState({
     priority: e ? e.value : null
   })
 
