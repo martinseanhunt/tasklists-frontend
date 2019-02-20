@@ -32,18 +32,14 @@ const TASKCARD_FRAGMENT = `
   }
   due
   dueDate
+  taskList {
+    name
+    slug
+  }
 `
 
 const DASHBOARD_QUERY = gql`
   query DASHBOARD_QUERY {
-    taskLists {
-      id
-      name
-      description
-      slug
-      totalTaskCount
-      completedTaskCount
-    }
     myOpenTasks {
       ${TASKCARD_FRAGMENT}
     }
@@ -75,7 +71,6 @@ const Index = () => (
         return (
           <Dashboard
             me={user.data.me}
-            taskLists={dashboard.data.taskLists}
             myOpenTasks={dashboard.data.myOpenTasks}
             mySubscriptions={dashboard.data.mySubscriptions}
           />

@@ -32,7 +32,7 @@ const TaskCard = ({ task, division }) => {
   return (
     <Col key={task.id} division={division} marginBottom>
       <Card
-        onClick={() => Router.pushRoute('task', { id: task.id })}
+        onClick={() => Router.pushRoute('taskWithSlug', { id: task.id, taskListSlug: task.taskList.slug })}
         clickable
       >
         <CardHeader>

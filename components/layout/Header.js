@@ -47,11 +47,10 @@ const HeaderStyles = styled.header`
   top:0;
   left: 0;
   height: 70px;
-  z-index: 1010;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 330px;
   
   h1 {
     font-size: 1.6rem;

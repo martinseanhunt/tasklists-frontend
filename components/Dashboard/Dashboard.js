@@ -40,13 +40,6 @@ class Dashboard extends Component {
     // TODO make sure cards are always the same height
 
     // Work out how to divide the row
-    let division = 'halves'
-
-    if(taskLists.length > 2 ) 
-      division = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
     let openTasksDivision = 'halves'
 
     if(myOpenTasks.length > 2 ) 
@@ -63,51 +56,6 @@ class Dashboard extends Component {
 
     return (
       <>
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="list"/>Lists</h2>
-        </SectionHeader>
-      </Col>
-      <Row marginBottom>
-        {taskLists && taskLists.map((taskList, i) => {
-          
-          const progress = this.calculateProgress(taskList)
-
-          return (
-            <Col key={taskList.id} division={division}>
-              <Card
-                onClick={() => Router.pushRoute('tasklist', { slug: taskList.slug })}
-                clickable
-              >
-                <CardInner>
-                  <div>
-                    <h3>{taskList.name}</h3>
-                    <p>{taskList.description.length > 100 
-                      ? taskList.description.substring(0,70) + '...'
-                      : taskList.description}</p>
-                  </div>
-                  
-                  <div>
-                    <span>Tasks Completed</span>
-                    <div className={`progress progress--${progress.allTasksComplete && 'complete'}`}>
-                      <span style={{ 
-                        width: progress.width, 
-                        display: progress.noTasks ? 'none' : 'block',
-                      }}></span>
-                    </div>
-                  </div>
-                </CardInner>
-                <CardFooter>
-                  <Link route="tasklist" params={{ slug: taskList.slug }}>
-                    <a>View Tasks →</a>
-                  </Link>
-                </CardFooter>
-              </Card>
-            </Col>
-          )}
-        )}
-      </Row>
-      
       {myOpenTasks && myOpenTasks.length > 0 && (
         <>
           <Col>

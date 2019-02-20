@@ -55,6 +55,9 @@ const CREATE_TASK_MUTATION = gql`
       assets: $assets
     ){
       id
+      taskList{
+        slug
+      }
     }
   }
 `
@@ -165,7 +168,7 @@ class CreateTaskForm extends Component {
   }
 
   onCompleted = ({ createTask }) => 
-    Router.pushRoute('task', { id: createTask.id })
+    Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
 
   render() {
     const { title, description, dueDate, dateDisabled, assets } = this.state
