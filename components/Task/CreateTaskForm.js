@@ -176,8 +176,19 @@ class CreateTaskForm extends Component {
     createTaskMutation({ variables: task })
   }
 
-  onCompleted = ({ createTask }) => {
-    this.props.client.resetStore()
+  update = (proxy) => {
+    // Working but I'm not entirely sure why it's working now when it wasn't before
+    Object.keys(proxy.data.data).forEach((key) => {
+      if (key.match(/^Task/) || key.match(/^taskList/)) {
+        proxy.data.delete(key);
+      }
+    })
+  }
+  
+  onCompleted = async ({ createTask }) => {
+    //props.client.resetStore() // working but coul dbe slow
+    // props.client.resetStore() // not working
+    console.log('pushing')
     Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
   }
     
@@ -190,6 +201,7 @@ class CreateTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_TASK_MUTATION}
+        update={this.update}
         onCompleted={this.onCompleted}
       >
         {( createTask, { error, loading } ) => (
