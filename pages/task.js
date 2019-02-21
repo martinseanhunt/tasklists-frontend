@@ -23,7 +23,7 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
 import { TASKLIST_QUERY } from './taskList'
-import { DASHBOARD_QUERY } from './index'
+import { DASHBOARD_QUERY } from '../components/Dashboard/Dashboard'
 
 // TODO design this page
 

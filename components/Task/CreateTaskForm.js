@@ -20,8 +20,8 @@ import Controls from '../styles/sidebar/Controls'
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
 
-import { TASKLIST_QUERY } from '../../pages/taskList'
-import { DASHBOARD_QUERY } from '../../pages/index'
+import { TASKLIST_QUERY } from '../..//pages/taskList'
+import { DASHBOARD_QUERY } from '../Dashboard/Dashboard'
 import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
 
 // TODO PRIORITY refactor this in to multiple components

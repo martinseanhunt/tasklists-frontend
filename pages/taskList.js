@@ -4,7 +4,7 @@ import gql from 'graphql-tag'
 import Container from '../components/styles/grid/Container'
 import TaskList from '../components/TaskList/TaskList'
 
-import { TASKCARD_FRAGMENT } from './index'
+import { TASKCARD_FRAGMENT } from '../components/Dashboard/Dashboard'
 
 // TODO use fragments for getting task info!
 
@@ -31,7 +31,7 @@ const TASKLIST_QUERY = gql`
 
 
 const TaskListPage = (props) => (
-  <Container>
+  <Container noPadd>
     <Query 
       query={TASKLIST_QUERY}
       variables={{

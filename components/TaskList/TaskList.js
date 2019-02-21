@@ -2,10 +2,14 @@ import React from 'react'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import { Router } from '../../routes'
+
 import Col from '../styles/grid/Col'
-import Row from '../styles/grid/Row'
-import TaskCard from './TaskCard'
-import CreateTaskCard from './CreateTaskCard'
+import Widget from '../styles/widget/Widget'
+import WidgetHeader from '../styles/widget/WidgetHeader'
+import WidgetRow from '../styles/widget/WidgetHeader'
+import Button from '../styles/Button'
+import ListView from '../ListView/ListView'
 
 // TODO Ordering and filtering!
 
@@ -22,85 +26,38 @@ import CreateTaskCard from './CreateTaskCard'
 
 // TODO tooltip for status bar
 
+// TODO PRIORITY: Toggle between open and completed and cancelled tasks
+
 const TaskList = ({ taskList, openTasks, completedTasks }) => {
-  let division = 'halves'
-  if((openTasks.length + 1) > 2 ) 
-    division = (openTasks.length) % 3 === 0
-      ? 'thirds'
-      : 'fourths'
-
   return (
-    <div>
-      <Col>
-        <h2>{taskList.name}</h2>
-        <p>{taskList.description}</p>
-
-        {/*  SEARCH HERE */}
-      </Col>
-
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="list"/>Open Tasks</h2>
-        </SectionHeader>
-      </Col>
-
-      <Row marginBottom>
-        <>
-        <CreateTaskCard division={division} taskList={taskList} />
-        {openTasks && openTasks.map(task => (
-          <TaskCard task={task} division={division} key={task.id}/>
-        ))}
-        </>
-      </Row>
-
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="check-square"/>Completed Tasks</h2>
-        </SectionHeader>
-      </Col>
-      <Row>
-        {completedTasks && completedTasks.map(task => (
-          <TaskCard task={task} division={division} key={task.id}/>
-        ))}
-      </Row>
-
-    </div>
+    <>
+      <TaskListHeader>
+        <WidgetHeader>
+          <h2>{taskList.name}</h2>
+          <Button 
+            primary 
+            onClick={() => Router.pushRoute('createTask', { taskListSlug: taskList.slug })}
+          >
+            <FontAwesomeIcon icon="plus" /> 
+            New Task
+          </Button>
+        </WidgetHeader>
+        <WidgetRow>
+          <p>{taskList.description}</p>
+        </WidgetRow>
+      </TaskListHeader>
+    
+    <Col>
+      <ListView listItems={openTasks} title={"Open Tasks"}/>
+      <ListView listItems={completedTasks} title={"Completed Tasks"}/>
+    </Col>
+    </>
   )
 }
 
-const SectionHeader = styled.div`
-  padding: 30px 0;
-  position: relative;
-  
-  h2 {
-    color: #3e3f42;
-    font-size: 1.4rem;
-    font-weight: 500;
-    margin: 0;
-    background: #fbfbfd;
-    z-index: 999;
-    position: relative;
-    display: inline;
-    padding-right: 20px;
-
-    svg {
-      font-size: 1.4rem;
-      margin-right: 10px;
-      color: #9ea0a5;
-    }
-  }
-
-  &:after {
-    position: absolute;
-    width: 100%;
-    height: 1px;
-    display: block;
-    background: #eaedf3;
-    content: "";
-    top: 50%;
-    left: 0;
-  }
-
+const TaskListHeader = styled(Widget)`
+  margin-bottom: 50px;
+  border: 0;
 `
 
 export default TaskList

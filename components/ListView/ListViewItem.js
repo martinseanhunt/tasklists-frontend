@@ -59,11 +59,11 @@ const dateColor = (date) => {
   return null
 }
 
-const TaskListItem = ({ task, division }) => {
+const ListViewItem = ({ task, division }) => {
   return (
     <TaskListItemContainer
       onClick={() => Router.pushRoute('taskWithSlug', { id: task.id, taskListSlug: task.taskList.slug })}
-      color={statusColorMap[task.status]}
+      color={task.taskList.color}
     >
       <Item>{task.title}</Item>
       <Item avatar>
@@ -135,13 +135,13 @@ const Item = styled.li`
   `}
 
   ${props => props.status && `
-    background: ${alphaHex(statusColorMap[props.status], 0.85)};
+    background: ${alphaHex(statusColorMap[props.status], 0.9)};
     font-weight: 500;
     color: #fff;
   `}
 
   ${props => props.highlight && `
-    background: ${alphaHex(props.highlight, 0.8)};
+    background: ${alphaHex(props.highlight, 0.9)};
     font-weight: 500;
     color: #fff;
   `}
@@ -168,4 +168,4 @@ const DueInfo = styled.div`
   margin-top: 0;
 `
 
-export default TaskListItem
+export default ListViewItem

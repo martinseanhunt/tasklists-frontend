@@ -1,70 +1,75 @@
 import React, { Component } from 'react'
-import { Router, Link } from '../../routes'
 import styled from 'styled-components'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Query } from 'react-apollo'
+import gql from 'graphql-tag'
+import { adopt } from 'react-adopt'
 
-import TaskListItem from '../TaskList/TaskListItem'
-
-import Row from '../styles/grid/Row'
 import Col from '../styles/grid/Col'
-import Card from '../styles/card/Card'
-import CardInner from '../styles/card/CardInner'
-import CardFooter from '../styles/card/CardFooter'
+import ListView from '../ListView/ListView'
+
+const TASKCARD_FRAGMENT = `
+  id
+  title
+  status
+  description
+  createdBy {
+    name
+    avatar
+    id
+  }
+  assignedTo {
+    name
+    avatar
+    id
+  }
+  subscribedUsers {
+    id
+    name
+    avatar
+  }
+  createdAt
+  due
+  dueDate
+  priority
+  taskList {
+    name
+    slug
+    color
+  }
+`
+
+const DASHBOARD_QUERY = gql`
+  query DASHBOARD_QUERY {
+    myOpenTasks {
+      ${TASKCARD_FRAGMENT}
+    }
+    mySubscriptions {
+      ${TASKCARD_FRAGMENT}
+    }
+  }
+`
+
+// TODO improve error message
+// TODO improve loading
 
 class Dashboard extends Component {
+  render = () => (
+    <Query query={DASHBOARD_QUERY}>
+      {({data, error, loading}) => {
+        if(error) return <p>Something went wrong</p>
+        if(loading) return <p>Loading...</p>
 
-  render() {
-    const { taskLists, myOpenTasks, mySubscriptions } = this.props
+        const {myOpenTasks, mySubscriptions} = data
 
-    return (
-      <>
-      {myOpenTasks && myOpenTasks.length > 0 && (
-        <Col>
-          <SectionHeader>
-            <h2><FontAwesomeIcon icon="list"/>Open Tasks Assigned To Me</h2>
-            <Headings>
-              <span>Creator</span>
-              <span>Assignee</span>
-              <span>Status</span>
-              <span>Created</span>
-              <span>Due</span>
-              <span>Priority</span>
-            </Headings>
-          </SectionHeader>
-
-          {myOpenTasks && myOpenTasks.map((task, i) => (
-            <TaskListItem key={task.id} task={task}/>
-          ))}
-        </Col>
-      )}
-      <br/>
-      <br/><br/><br/>
-      {mySubscriptions && mySubscriptions.length > 0 && (
-        <>
+        return (
           <Col>
-            <SectionHeader>
-              <h2><FontAwesomeIcon icon="list"/>Open Tasks I'm Subscribed To</h2>
-              <Headings>
-                <span>Creator</span>
-                <span>Assignee</span>
-                <span>Status</span>
-                <span>Created</span>
-                <span>Due</span>
-                <span>Priority</span>
-              </Headings>
-            </SectionHeader>
-         
-            {mySubscriptions.map((task, i) => (
-              <TaskListItem key={task.id} task={task} />
-            ))}
-
+            <ListView listItems={myOpenTasks} title={"Open Tasks Assigned To Me"}/>
+            <ListView listItems={mySubscriptions} title={"Open Tasks I'm Subscribed To"}/>
           </Col>
-        </>
-      )}
-      
-      </>
-    )
-  }
+        )
+      }}
+    </Query> 
+  )
 }
 
 const SectionHeader = styled.div` 
@@ -125,3 +130,4 @@ const Headings = styled.div`
 `
 
 export default Dashboard
+export { DASHBOARD_QUERY, TASKCARD_FRAGMENT }
