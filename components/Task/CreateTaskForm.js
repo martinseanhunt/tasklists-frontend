@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Mutation } from 'react-apollo'
+import { Mutation, withApollo } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
 import moment from 'moment'
@@ -20,7 +20,7 @@ import Controls from '../styles/sidebar/Controls'
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
 
-import { TASKLIST_QUERY } from '../..//pages/taskList'
+import { TASKLIST_QUERY } from '../TaskList/TaskList'
 import { DASHBOARD_QUERY } from '../Dashboard/Dashboard'
 import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
 
@@ -109,7 +109,7 @@ class CreateTaskForm extends Component {
     assignedTo: e ? e.value : null
   })
 
-  handlePriorityChange = (e) => console.log(e.value) || this.setState({
+  handlePriorityChange = (e) => this.setState({
     priority: e ? e.value : null
   })
 
@@ -176,8 +176,11 @@ class CreateTaskForm extends Component {
     createTaskMutation({ variables: task })
   }
 
-  onCompleted = ({ createTask }) => 
+  onCompleted = ({ createTask }) => {
+    this.props.client.resetStore()
     Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
+  }
+    
 
   render() {
     const { title, description, dueDate, dateDisabled, assets } = this.state
@@ -187,17 +190,7 @@ class CreateTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_TASK_MUTATION}
-        update={this.update}
         onCompleted={this.onCompleted}
-        refetchQueries={[{
-          query: TASKLIST_QUERY,
-          variables: {
-            slug: this.props.taskList.slug
-          }
-        },
-        { query: DASHBOARD_QUERY },
-        { query: TASKLISTS_QUERY }
-      ]}
       >
         {( createTask, { error, loading } ) => (
           <Form 
@@ -478,4 +471,4 @@ class CreateTaskForm extends Component {
   }
 }
 
-export default CreateTaskForm
+export default withApollo(CreateTaskForm)

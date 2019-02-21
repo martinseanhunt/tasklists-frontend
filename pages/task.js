@@ -1,6 +1,5 @@
 import { Query, Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
-import Select from 'react-select'
 import moment from 'moment'
 import { Link } from '../routes'
 import styled from 'styled-components'
@@ -9,7 +8,6 @@ import Row from '../components/styles/grid/Row'
 import Col from '../components/styles/grid/Col'
 import Container from '../components/styles/grid/Container'
 import SidebarRow from '../components/styles/sidebar/SidebarRow'
-import Controls from '../components/styles/sidebar/Controls'
 import Button from '../components/styles/Button'
 import Widget from '../components/styles/widget/Widget'
 import WidgetHeader from '../components/styles/widget/WidgetHeader'
@@ -22,7 +20,7 @@ import Avatar from '../components/common/Avatar'
 import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
-import { TASKLIST_QUERY } from './taskList'
+import { TASKLIST_QUERY } from '../components/TaskList/TaskList'
 import { DASHBOARD_QUERY } from '../components/Dashboard/Dashboard'
 
 // TODO design this page

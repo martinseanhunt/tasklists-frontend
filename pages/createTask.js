@@ -38,6 +38,9 @@ class CreateTask extends Component {
             {({data, error, loading}) => {
               if(error) return <p>Oops something went wrong!</p>
               if(loading) return <p>Loading...</p>
+
+              // Fix for clearing cache after creating task
+              if(!data.taskList) return <p>NoData</p>
               
               return (
                 <>

@@ -25,6 +25,10 @@ class ListView extends Component {
           {listItems && listItems.length > 0 && listItems.map((task, i) => (
             <ListViewItem key={task.id} task={task}/>
           ))}
+
+          {listItems && !listItems.length > 0 && (
+            <p>Uh oh, there aren't any {title.toLowerCase()} here 🤷</p>
+          )}
         </ListContainer>
       )
     }
@@ -39,7 +43,7 @@ class ListView extends Component {
     margin: 0 0 30px 0;
     position: relative;
     display: flex;
-    border-bottom 1px solid #eaedf3;
+    border-bottom: 1px solid #eaedf3;
     
     h2 {
       color: #3e3f42;
@@ -53,6 +57,7 @@ class ListView extends Component {
       display: inline;
       width: 350px;
       min-width: 218px;
+      text-transform: capitalize;
   
       svg {
         font-size: 1.4rem;

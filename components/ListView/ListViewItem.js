@@ -43,8 +43,8 @@ const statusColorMap = {
   AWAITINGFEEDBACK: '#F6AB2F',
   INPROGRESS: '#FACF55',
   COMPLETED: '#34AA44', 
-  CLOSED: '#000',
-  CANCELLED: '#000'
+  CLOSED: '#000001',
+  CANCELLED: '#000001'
 }
 
 const priorityColorMap = {

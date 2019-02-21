@@ -20,6 +20,9 @@ export default withApollo(({ ctx, headers }) => {
     clientState: {
       defaults: {
         showError: false,
+      },
+      resolvers: {
+        Query: () => ({}) // fixes weird bug with client.resetStore()
       }
     },
 

@@ -6,6 +6,7 @@ import { Router, Link } from '../../routes'
 import { withRouter } from 'next/router'
 
 import alphaHex from '../../utils/alphaHex'
+import TaskListIcon from '../common/TaskListIcon'
 
 const TASKLISTS_QUERY = gql`
   query TASKLISTS_QUERY {
@@ -60,9 +61,10 @@ class TaskLists extends Component {
                     color={listColor}
                     colorAlpha={listColorAlpha}
                   >
-                    <Icon  color={listColor}>
-                      {taskList.name.split(' ').map((word, i) => i < 2 ? word[0] : null).join('')}
-                    </Icon>
+                    <TaskListIcon  
+                      color={listColor}
+                      name={taskList.name}
+                    />
                     <Content>
                       <h3>{taskList.name}</h3>
                       
@@ -130,20 +132,6 @@ const ListItem = styled.div`
     }
     
   }
-`
-
-const Icon = styled.div`
-  border-radius: 3px;
-  background: ${props => props.color};
-  width: 38px;
-  height: 38px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  font-weight:bold;
-  font-size: 18px;
-  text-transform: uppercase;
 `
 
 const Content = styled.div`
