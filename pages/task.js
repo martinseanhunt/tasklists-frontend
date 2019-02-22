@@ -22,8 +22,9 @@ import Avatar from '../components/common/Avatar'
 import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
-import { TASKLIST_QUERY } from './taskList'
+import { TASKLIST_QUERY } from '../components/TaskList/TaskList'
 import { DASHBOARD_QUERY } from '../components/Dashboard/Dashboard'
+import { TASKLISTS_QUERY } from '../components/TaskLists/TaskLists'
 
 // TODO design this page
 
@@ -106,6 +107,7 @@ const UPDATE_TASK_STATUS = gql`
   mutation UPDATE_TASK_STATUS($id: ID!, $status: TaskStatus!) {
     updateTaskStatus(id: $id, status: $status) {
       id
+      status
     }
   }
 `
@@ -277,10 +279,26 @@ const TaskPage = ({ query }) => (
                             {
                               query: TASKLIST_QUERY,
                               variables: {
-                                slug: task.taskList.slug
+                                slug: task.taskList.slug,
+                                filterByStatus: ['COMPLETED']
                               }
                             },
-                            { query: DASHBOARD_QUERY }
+                            {
+                              query: TASKLIST_QUERY,
+                              variables: {
+                                slug: task.taskList.slug,
+                                filterByStatus: ['CLOSED', 'CANCELLED']
+                              }
+                            },
+                            {
+                              query: TASKLIST_QUERY,
+                              variables: {
+                                slug: task.taskList.slug,
+                                excludeStatus: ['CANCELLED', 'CLOSED', 'COMPLETED']
+                              }
+                            },
+                            { query: DASHBOARD_QUERY },
+                            { query: TASKLISTS_QUERY }
                           ]}
                           variables={{
                             id: task.id,
@@ -293,7 +311,17 @@ const TaskPage = ({ query }) => (
                               ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
                               : 'COMPLETED'
                           }}
-                          onCompleted={() => refetch()}
+                          update={(cache, data) => {
+                            const { id, status } =  data.data.updateTaskStatus
+                            cache.writeQuery({
+                              query: TASK_QUERY,
+                              variables: { id },
+                              data: { task: {
+                                ...task,
+                                status
+                              }
+                            }})
+                          }}
                         >
                         {( updateTaskStatus, updateStatus ) => {
 
