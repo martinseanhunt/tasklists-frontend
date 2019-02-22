@@ -5,6 +5,7 @@ import Select from 'react-select'
 import moment from 'moment'
 import { Link } from '../routes'
 import styled from 'styled-components'
+import Confetti from 'react-dom-confetti'
 
 import { Router } from '../routes'
 
@@ -104,6 +105,19 @@ const TASK_QUERY = gql`
     }
   }
 `
+
+const confettiConfig = {
+  angle: 90,
+  spread: 45,
+  startVelocity: 45,
+  elementCount: 50,
+  dragFriction: 0.1,
+  duration: 3000,
+  delay: 0,
+  width: "10px",
+  height: "10px",
+  colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"]
+};
 
 const UPDATE_TASK_STATUS = gql`
   mutation UPDATE_TASK_STATUS($id: ID!, $status: TaskStatus!) {
@@ -232,7 +246,7 @@ class TaskPage extends Component {
                       <Col>
                         <Widget>
                           <WidgetHeader noFlex notFixed>
-                            <h1>{task.title}</h1>
+                            <h1>{task.title}</h1>                            
                             <p> 
                               {task.createdBy.name} created this task on {moment(task.createdAt).format('MMM Do YYYY')}
                             </p>
@@ -312,6 +326,8 @@ class TaskPage extends Component {
                                         </Button>
                                       )}
                                     </div>
+                                    
+                                    <Confetti active={ ['COMPLETED'].includes(task.status) } config={ confettiConfig }/>
                                     {['COMPLETED', 'CLOSED'].includes(task.status) ? (
                                       <Button primary
                                         onClick={updateTaskStatus}
