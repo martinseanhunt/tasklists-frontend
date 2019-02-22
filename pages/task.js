@@ -5,6 +5,8 @@ import moment from 'moment'
 import { Link } from '../routes'
 import styled from 'styled-components'
 
+import { Router } from '../routes'
+
 import Row from '../components/styles/grid/Row'
 import Col from '../components/styles/grid/Col'
 import Container from '../components/styles/grid/Container'
@@ -22,6 +24,7 @@ import Avatar from '../components/common/Avatar'
 import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
+import clearCache from '../utils/clearCache'
 import { TASKLIST_QUERY } from '../components/TaskList/TaskList'
 import { DASHBOARD_QUERY } from '../components/Dashboard/Dashboard'
 import { TASKLISTS_QUERY } from '../components/TaskLists/TaskLists'
@@ -108,6 +111,9 @@ const UPDATE_TASK_STATUS = gql`
     updateTaskStatus(id: $id, status: $status) {
       id
       status
+      taskList {
+        slug
+      }
     }
   }
 `
@@ -115,10 +121,13 @@ const UPDATE_TASK_STATUS = gql`
 const SUBSCRIBE_TO_TASK = gql`
   mutation SUBSCRIBE_TO_TASK($task: ID!) {
     subscribeToTask(task: $task) {
+      id
+      taskList {
+        slug
+      }
       subscribedUsers {
         id
         name
-        avatar
       }
     }
   }
@@ -127,6 +136,10 @@ const SUBSCRIBE_TO_TASK = gql`
 const UNSUBSCRIBE_FROM_TASK = gql`
   mutation UNSUBSCRIBE_FROM_TASK($task: ID!) {
     unsubscribeFromTask(task: $task) {
+      id
+      taskList {
+        slug
+      }
       subscribedUsers {
         id
         name
@@ -149,6 +162,8 @@ const TaskPage = ({ query }) => (
             if(loading) return <p>Loading...</p>
 
             const { task } = data
+            if(!task) return <p>Loading...</p>
+
             return (
               <>
               <SubHeader>
@@ -162,18 +177,9 @@ const TaskPage = ({ query }) => (
                   <Mutation
                     mutation={UNSUBSCRIBE_FROM_TASK}
                     variables={{ task: task.id }}
-                    refetchQueries={[{ query: DASHBOARD_QUERY }]}
-                    update={(cache, { data: unsubscribeFromTask }) => {
-                      cache.writeQuery({
-                        query: TASK_QUERY,
-                        variables: { id: task.id },
-                        data: { task: {
-                          ...task,
-                          subscribedUsers: [
-                            ...unsubscribeFromTask.unsubscribeFromTask.subscribedUsers
-                          ]
-                        }
-                      }})
+                    update={(cache, data ) => {
+                      clearCache(cache)
+                      Router.pushRoute('taskWithSlug', { id: data.data.unsubscribeFromTask.id, taskListSlug: data.data.unsubscribeFromTask.taskList.slug })
                     }}
                   >
                     {(unsubscribeFromTask, {data, error, loading}) => {
@@ -193,18 +199,9 @@ const TaskPage = ({ query }) => (
                   <Mutation
                     mutation={SUBSCRIBE_TO_TASK}
                     variables={{ task: task.id }}
-                    refetchQueries={[{ query: DASHBOARD_QUERY }]}
-                    update={(cache, { data: subscribeToTask }) => {
-                      cache.writeQuery({
-                        query: TASK_QUERY,
-                        variables: { id: task.id },
-                        data: { task: {
-                          ...task,
-                          subscribedUsers: [
-                            ...subscribeToTask.subscribeToTask.subscribedUsers
-                          ]
-                        }
-                      }})
+                    update={(cache, data ) => {
+                      clearCache(cache)
+                      Router.pushRoute('taskWithSlug', { id: data.data.subscribeToTask.id, taskListSlug: data.data.subscribeToTask.taskList.slug })
                     }}
                   >
                     {(subscribeToTask, {data, error, loading}) => {
@@ -275,31 +272,7 @@ const TaskPage = ({ query }) => (
                       && (
                         <Mutation
                           mutation={UPDATE_TASK_STATUS}
-                          refetchQueries={[
-                            {
-                              query: TASKLIST_QUERY,
-                              variables: {
-                                slug: task.taskList.slug,
-                                filterByStatus: ['COMPLETED']
-                              }
-                            },
-                            {
-                              query: TASKLIST_QUERY,
-                              variables: {
-                                slug: task.taskList.slug,
-                                filterByStatus: ['CLOSED', 'CANCELLED']
-                              }
-                            },
-                            {
-                              query: TASKLIST_QUERY,
-                              variables: {
-                                slug: task.taskList.slug,
-                                excludeStatus: ['CANCELLED', 'CLOSED', 'COMPLETED']
-                              }
-                            },
-                            { query: DASHBOARD_QUERY },
-                            { query: TASKLISTS_QUERY }
-                          ]}
+                          
                           variables={{
                             id: task.id,
                             // TODO refactor this and move in to setStatus function
@@ -312,15 +285,8 @@ const TaskPage = ({ query }) => (
                               : 'COMPLETED'
                           }}
                           update={(cache, data) => {
-                            const { id, status } =  data.data.updateTaskStatus
-                            cache.writeQuery({
-                              query: TASK_QUERY,
-                              variables: { id },
-                              data: { task: {
-                                ...task,
-                                status
-                              }
-                            }})
+                            clearCache(cache)
+                            Router.pushRoute('taskWithSlug', { id: data.data.updateTaskStatus.id, taskListSlug: data.data.updateTaskStatus.taskList.slug })
                           }}
                         >
                         {( updateTaskStatus, updateStatus ) => {

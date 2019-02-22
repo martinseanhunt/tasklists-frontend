@@ -77,7 +77,7 @@ const SectionHeader = styled.div`
   margin: 0 0 30px 0;
   position: relative;
   display: flex;
-  border-bottom 1px solid #eaedf3;
+  border-bottom: 1px solid #eaedf3;
   
   h2 {
     color: #3e3f42;
