@@ -1,4 +1,5 @@
-import { Query, Mutation } from 'react-apollo'
+import React, { Component } from 'react'
+import { Query, Mutation, withApollo } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
 import moment from 'moment'
@@ -25,8 +26,6 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
 import clearCache from '../utils/clearCache'
-import { TASKLIST_QUERY } from '../components/TaskList/TaskList'
-import { DASHBOARD_QUERY } from '../components/Dashboard/Dashboard'
 import { TASKLISTS_QUERY } from '../components/TaskLists/TaskLists'
 
 // TODO design this page
@@ -149,233 +148,240 @@ const UNSUBSCRIBE_FROM_TASK = gql`
   }
 `
 
-const TaskPage = ({ query }) => (
-  <User>
-    {({data: userData, error, loading}) => { 
-      if(error) return <p>Something went wrong</p>
-      if(loading) return <p>Loading...</p>
+class TaskPage extends Component { 
+  state = {
+    clearCacheOnUnmount: false
+  }
 
-      return ( 
-        <Query query={TASK_QUERY} variables={{ id: query.id }}>
-          {({ data, error, loading, refetch }) => {
-            if(error) return <p>Something went wrong</p>
-            if(loading) return <p>Loading...</p>
+  async componentWillUnmount() {
+    if(this.state.clearCacheOnUnmount) {
+      await clearCache(this.props.client.cache, true)
+    }
+  }
+  
+  render() { 
+    const { query } = this.props
 
-            const { task } = data
-            if(!task) return <p>Loading...</p>
+    return (
+      <User>
+        {({data: userData, error, loading}) => { 
+          if(error) return <p>Something went wrong</p>
+          if(loading) return <p>Loading...</p>
 
-            return (
-              <>
-              <SubHeader>
-                <BreadCrumb>
-                  <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>« Task List: {task.taskList.name}</a></Link>
-                </BreadCrumb>
+          return ( 
+            <Query query={TASK_QUERY} variables={{ id: query.id }}>
+              {({ data, error, loading, refetch }) => {
+                if(error) return <p>Something went wrong</p>
+                if(loading) return <p>Loading...</p>
 
-                {/* TODO refactor these two operations to use same mutation nad move in to own compoennt  */}
+                const { task } = data
+                if(!task) return <p>Loading...</p>
 
-                {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
-                  <Mutation
-                    mutation={UNSUBSCRIBE_FROM_TASK}
-                    variables={{ task: task.id }}
-                    update={(cache, data ) => {
-                      clearCache(cache)
-                      Router.pushRoute('taskWithSlug', { id: data.data.unsubscribeFromTask.id, taskListSlug: data.data.unsubscribeFromTask.taskList.slug })
-                    }}
-                  >
-                    {(unsubscribeFromTask, {data, error, loading}) => {
-                      if(error) console.log(error)
-                      
-                      return (
-                        <Button
-                          onClick={unsubscribeFromTask}
-                          disabled={loading}
-                        >
-                          Unsubscribe from task
-                        </Button>
-                      )
-                    }}
-                  </Mutation>
-                ) : (
-                  <Mutation
-                    mutation={SUBSCRIBE_TO_TASK}
-                    variables={{ task: task.id }}
-                    update={(cache, data ) => {
-                      clearCache(cache)
-                      Router.pushRoute('taskWithSlug', { id: data.data.subscribeToTask.id, taskListSlug: data.data.subscribeToTask.taskList.slug })
-                    }}
-                  >
-                    {(subscribeToTask, {data, error, loading}) => {
-                      if(error) console.log(error)
-                      
-                      return (
-                        <Button
-                          onClick={subscribeToTask}
-                          disabled={loading}
-                        >
-                          Subscribe to Task
-                        </Button>
-                      )
-                    }}
-                  </Mutation>
-                )}
-              </SubHeader>
+                return (
+                  <>
+                  <SubHeader>
+                    <BreadCrumb>
+                      <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>« Task List: {task.taskList.name}</a></Link>
+                    </BreadCrumb>
 
-              <Container>
-                <Row>
-                  <Col>
-                    <Widget>
-                      <WidgetHeader noFlex notFixed>
-                        <h1>{task.title}</h1>
-                        <p> 
-                          {task.createdBy.name} created this task on {moment(task.createdAt).format('MMM Do YYYY')}
-                        </p>
-                        
-                      </WidgetHeader>
-                      
-                      <TaskMeta>
-                        <div>
-                          <span className="label">Status: </span>  <span>{task.status}</span>
-                        </div>
+                    {/* TODO refactor these two operations to use same mutation nad move in to own compoennt  */}
 
-                        <div>
-                          <span className="label">Due: </span>  <span>{task.due} {task.dueDate && moment(task.dueDate).format('MMM Do YYYY')}</span>
-                        </div>
-
-                        <div>
-                          <span className="label">Assigned to: </span>  
-                          <span>
-                            {task.assignedTo 
-                              ? <Avatar user={task.assignedTo}/>
-                              : 'None'
-                            }
-                            
-                          </span>
-                        </div>
-
-                        {task.customFields.length > 0 && (
-                          task.customFields.map(cf => (
-                            <div key={cf.id}>
-                              <span className="label">{cf.fieldName}:</span> 
-                              <span>{cf.fieldValue}</span>
-                            </div>
-                          ))
-                       )}
-                      </TaskMeta>
-
-                      <WidgetRow>
-                        <p>{task.description}</p>
-                      </WidgetRow>
-
-                      {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
-                      || task.createdBy.id === userData.me.id
-                      || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
-                      && (
-                        <Mutation
-                          mutation={UPDATE_TASK_STATUS}
+                    {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
+                      <Mutation
+                        mutation={UNSUBSCRIBE_FROM_TASK}
+                        variables={{ task: task.id }}
+                        onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                      >
+                        {(unsubscribeFromTask, {data, error, loading}) => {
+                          if(error) console.log(error)
                           
-                          variables={{
-                            id: task.id,
-                            // TODO refactor this and move in to setStatus function
-                            // there are more complicated use cases to account for
-
-                            // TODO Refetching is a bit of overkill here... Could do an optimistic
-                            // thing or just manually update the cache on complete
-                            status: ['COMPLETED', 'CLOSED'].includes(task.status) 
-                              ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
-                              : 'COMPLETED'
-                          }}
-                          update={(cache, data) => {
-                            clearCache(cache)
-                            Router.pushRoute('taskWithSlug', { id: data.data.updateTaskStatus.id, taskListSlug: data.data.updateTaskStatus.taskList.slug })
-                          }}
-                        >
-                        {( updateTaskStatus, updateStatus ) => {
-
                           return (
-                              <WidgetFooter>
-                                <div className="controls">
-                                  <Button>
-                                    Edit
-                                  </Button>
-                                  {!['COMPLETED', 'CLOSED'].includes(task.status) && (
-                                    <Button cancel
-                                      onClick={() => updateTaskStatus({ variables: {
-                                        id: task.id,
-                                        status: 'CLOSED'
-                                      }})}
-                                    >
-                                      Clos{updateStatus.loading ? 'ing' : 'e'} Task
-                                    </Button>
-                                  )}
-                                </div>
-                                {['COMPLETED', 'CLOSED'].includes(task.status) ? (
-                                  <Button primary
-                                    onClick={updateTaskStatus}
-                                    disabled={updateStatus.loading}
-                                  >
-                                    Re-Open{updateStatus.loading && 'ing'} Task
-                                  </Button>
-                                ) : (
-                                  <Button secondary
-                                    onClick={updateTaskStatus}
-                                    disabled={updateStatus.loading}
-                                  >
-                                    Complet{updateStatus.loading ? 'ing' : 'e'} Task
-                                  </Button>
-                                )}
+                            <Button
+                              onClick={unsubscribeFromTask}
+                              disabled={loading}
+                            >
+                              Unsubscribe from task
+                            </Button>
+                          )
+                        }}
+                      </Mutation>
+                    ) : (
+                      <Mutation
+                        mutation={SUBSCRIBE_TO_TASK}
+                        variables={{ task: task.id }}
+                        onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                      >
+                        {(subscribeToTask, {data, error, loading}) => {
+                          if(error) console.log(error)
+                          
+                          return (
+                            <Button
+                              onClick={subscribeToTask}
+                              disabled={loading}
+                            >
+                              Subscribe to Task
+                            </Button>
+                          )
+                        }}
+                      </Mutation>
+                    )}
+                  </SubHeader>
+
+                  <Container>
+                    <Row>
+                      <Col>
+                        <Widget>
+                          <WidgetHeader noFlex notFixed>
+                            <h1>{task.title}</h1>
+                            <p> 
+                              {task.createdBy.name} created this task on {moment(task.createdAt).format('MMM Do YYYY')}
+                            </p>
+                            
+                          </WidgetHeader>
+                          
+                          <TaskMeta>
+                            <div>
+                              <span className="label">Status: </span>  <span>{task.status}</span>
+                            </div>
+
+                            <div>
+                              <span className="label">Due: </span>  <span>{task.due} {task.dueDate && moment(task.dueDate).format('MMM Do YYYY')}</span>
+                            </div>
+
+                            <div>
+                              <span className="label">Assigned to: </span>  
+                              <span>
+                                {task.assignedTo 
+                                  ? <Avatar user={task.assignedTo}/>
+                                  : 'None'
+                                }
                                 
-                              </WidgetFooter>
-                            ) 
-                          }}
-                        </Mutation>
-                      )
-                    }
-                    </Widget>
+                              </span>
+                            </div>
 
-                    <Comments 
-                      task={task}
-                      user={userData.me}
-                    />
-                  </Col>
-                  <Col division='fourths'>
-                   
-                    <SidebarRow>
-                      <h4>Assigned</h4>
-                      <p>This task is assigned to:</p>
-                      <strong>{task.assignedTo ? (
-                        <>
-                          <Avatar user={task.assignedTo} />
-                          {task.assignedTo.name}
-                        </>
-                      ) : <p>None</p>}</strong>
-                    </SidebarRow>
+                            {task.customFields.length > 0 && (
+                              task.customFields.map(cf => (
+                                <div key={cf.id}>
+                                  <span className="label">{cf.fieldName}:</span> 
+                                  <span>{cf.fieldValue}</span>
+                                </div>
+                              ))
+                          )}
+                          </TaskMeta>
 
-                    <SidebarRow>
-                      <h4>Attachments</h4>
-                      <p>Attachments for the task:</p>
-                      {task.assets.length > 0 && (
-                        task.assets.map(a => (
-                          <li key={a.id}>
-                            <a href={a.assetUrl} target="__blank">{a.title} ({a.assetType})</a>
-                          </li>
-                        ))
-                      )}
-                    </SidebarRow>
+                          <WidgetRow>
+                            <p>{task.description}</p>
+                          </WidgetRow>
 
-                   
-                  </Col>
-                </Row>
-              </Container>
-              </>
-            )
-          }}
-        </Query>
-      )
-    }}
-  </User>
-)
+                          {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
+                          || task.createdBy.id === userData.me.id
+                          || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
+                          && (
+                            <Mutation
+                              mutation={UPDATE_TASK_STATUS}
+                              refetchQueries={[{ query: TASKLISTS_QUERY }]}
+                              variables={{
+                                id: task.id,
+                                // TODO refactor this and move in to setStatus function
+                                // there are more complicated use cases to account for
 
-export default TaskPage
+                                // TODO Refetching is a bit of overkill here... Could do an optimistic
+                                // thing or just manually update the cache on complete
+                                status: ['COMPLETED', 'CLOSED'].includes(task.status) 
+                                  ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
+                                  : 'COMPLETED'
+                              }}
+                              onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                            >
+                            {( updateTaskStatus, updateStatus ) => {
+
+                              return (
+                                  <WidgetFooter>
+                                    <div className="controls">
+                                      <Button>
+                                        Edit
+                                      </Button>
+                                      {!['COMPLETED', 'CLOSED'].includes(task.status) && (
+                                        <Button cancel
+                                          onClick={() => updateTaskStatus({ variables: {
+                                            id: task.id,
+                                            status: 'CLOSED'
+                                          }})}
+                                        >
+                                          Clos{updateStatus.loading ? 'ing' : 'e'} Task
+                                        </Button>
+                                      )}
+                                    </div>
+                                    {['COMPLETED', 'CLOSED'].includes(task.status) ? (
+                                      <Button primary
+                                        onClick={updateTaskStatus}
+                                        disabled={updateStatus.loading}
+                                      >
+                                        Re-Open{updateStatus.loading && 'ing'} Task
+                                      </Button>
+                                    ) : (
+                                      <Button secondary
+                                        onClick={updateTaskStatus}
+                                        disabled={updateStatus.loading}
+                                      >
+                                        Complet{updateStatus.loading ? 'ing' : 'e'} Task
+                                      </Button>
+                                    )}
+                                    
+                                  </WidgetFooter>
+                                ) 
+                              }}
+                            </Mutation>
+                          )
+                        }
+                        </Widget>
+
+                        <Comments 
+                          task={task}
+                          user={userData.me}
+                        />
+                      </Col>
+                      <Col division='fourths'>
+                      
+                        <SidebarRow>
+                          <h4>Assigned</h4>
+                          <p>This task is assigned to:</p>
+                          <strong>{task.assignedTo ? (
+                            <>
+                              <Avatar user={task.assignedTo} />
+                              {task.assignedTo.name}
+                            </>
+                          ) : <p>None</p>}</strong>
+                        </SidebarRow>
+
+                        <SidebarRow>
+                          <h4>Attachments</h4>
+                          <p>Attachments for the task:</p>
+                          {task.assets.length > 0 && (
+                            task.assets.map(a => (
+                              <li key={a.id}>
+                                <a href={a.assetUrl} target="__blank">{a.title} ({a.assetType})</a>
+                              </li>
+                            ))
+                          )}
+                        </SidebarRow>
+
+                      
+                      </Col>
+                    </Row>
+                  </Container>
+                  </>
+                )
+              }}
+            </Query>
+          )
+        }}
+      </User>
+    )
+  }  
+}
+
+export default withApollo(TaskPage)
 export { TASK_QUERY }
 
 const TaskMeta = styled(WidgetRow)`

@@ -21,6 +21,9 @@ import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
 import clearCache from '../../utils/clearCache'
 
+import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
+
+
 // TODO PRIORITY refactor this in to multiple components
 
 // TODO test this with various roles
@@ -172,13 +175,11 @@ class CreateTaskForm extends Component {
 
     createTaskMutation({ variables: task })
   }
-
-  update = (cache) => clearCache(cache)
   
   onCompleted = async ({ createTask }) => {
     //props.client.resetStore() // working but coul dbe slow
     // props.client.resetStore() // not working
-    console.log('pushing')
+    await clearCache(this.props.client.cache, true)
     Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
   }
     
@@ -191,8 +192,8 @@ class CreateTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_TASK_MUTATION}
-        update={this.update}
         onCompleted={this.onCompleted}
+        refetchQueries={[{ query: TASKLISTS_QUERY }]}
       >
         {( createTask, { error, loading } ) => (
           <Form 
