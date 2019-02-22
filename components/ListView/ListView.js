@@ -5,6 +5,27 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ListViewItem from './ListViewItem'
 
 class ListView extends Component {
+    handleSort = (e) => {
+      console.log(e.target.innerHTML)
+      let sort = ''
+      switch (e.target.innerHTML) {
+        case 'Status':
+          sort = 'status_ASC'
+          break
+        case 'Created':
+          sort = 'createdAt_ASC'
+          break
+        case 'Due':
+          sort = 'dueDate_ASC'
+          break
+        case 'Priority':
+          sort = 'priority_ASC'
+          break
+      }
+
+      this.props.updateSortBy(sort)
+    }
+
     render() {
       const { listItems, title } = this.props
   
@@ -15,10 +36,10 @@ class ListView extends Component {
             <Headings>
               <span>Creator</span>
               <span>Assignee</span>
-              <span>Status</span>
-              <span>Created</span>
-              <span>Due</span>
-              <span>Priority</span>
+              <span className='sort' onClick={this.handleSort}>Status</span>
+              <span className='sort' onClick={this.handleSort}>Created</span>
+              <span className='sort' onClick={this.handleSort}>Due</span>
+              <span className='sort' onClick={this.handleSort}>Priority</span>
             </Headings>
           </SectionHeader>
 
@@ -63,6 +84,15 @@ class ListView extends Component {
         font-size: 1.4rem;
         margin-right: 10px;
         color: #9ea0a5;
+      }
+    }
+
+    .sort { 
+      color: #1f6fe5;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
       }
     }
   `

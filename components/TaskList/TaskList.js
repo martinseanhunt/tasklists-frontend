@@ -34,7 +34,8 @@ const TASKLIST_QUERY = gql`
   query TASKLIST_QUERY(
     $slug: String!, 
     $excludeStatus: [TaskStatus],
-    $filterByStatus: [TaskStatus]
+    $filterByStatus: [TaskStatus],
+    $orderBy: String
   ) {
     taskList(slug: $slug) {
       name
@@ -48,6 +49,7 @@ const TASKLIST_QUERY = gql`
       taskListSlug: $slug
       excludeStatus: $excludeStatus
       filterByStatus: $filterByStatus
+      orderBy: $orderBy
     ) {
       ${TASKCARD_FRAGMENT}
     }
@@ -59,7 +61,8 @@ class TaskList extends Component {
     viewing: {
       value: 'open',
       label: 'Viewing Open Tasks'
-    }
+    },
+    sortBy: null
   }
 
   getFilterVariables() {
@@ -81,7 +84,7 @@ class TaskList extends Component {
     this.setState({ viewing: e })
   }
 
-  refetchQuery = () => ''
+  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy }) || console.log(sortBy)
 
   render() {
     const { slug } = this.props
@@ -91,7 +94,8 @@ class TaskList extends Component {
         query={TASKLIST_QUERY}
         variables={{
           slug,
-          ...this.getFilterVariables()
+          ...this.getFilterVariables(),
+          orderBy: this.state.sortBy,
         }}
       >
         {({data, error, loading}) => {
@@ -152,7 +156,11 @@ class TaskList extends Component {
               </TaskListHeader>
             
               <Col>
-                <ListView listItems={tasks} title={this.state.viewing.value + ' Tasks'}/>
+                <ListView 
+                  listItems={tasks} 
+                  sortBy={this.state.sortBy} 
+                  updateSortBy={this.updateSortBy} 
+                  title={this.state.viewing.value + ' Tasks'}/>
               </Col>
             </>
           )
