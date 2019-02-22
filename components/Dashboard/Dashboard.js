@@ -39,11 +39,11 @@ const TASKCARD_FRAGMENT = `
 `
 
 const DASHBOARD_QUERY = gql`
-  query DASHBOARD_QUERY {
-    myOpenTasks {
+  query DASHBOARD_QUERY($orderBy: String, $subOrderBy: String) {
+    myOpenTasks(orderBy: $orderBy) {
       ${TASKCARD_FRAGMENT}
     }
-    mySubscriptions {
+    mySubscriptions(orderBy: $subOrderBy) {
       ${TASKCARD_FRAGMENT}
     }
   }
@@ -53,8 +53,16 @@ const DASHBOARD_QUERY = gql`
 // TODO improve loading
 
 class Dashboard extends Component {
+  state = {
+    sortBy: null,
+    subSortBy: null
+  }
+
+  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy })
+  updateSubSortBy = (sortBy) => this.setState({ subSortBy: sortBy })
+
   render = () => (
-    <Query query={DASHBOARD_QUERY}>
+    <Query query={DASHBOARD_QUERY} variables={{ orderBy: this.state.sortBy, subOrderBy: this.state.subSortBy }}>
       {({data, error, loading}) => {
         if(error) return <p>Something went wrong</p>
         if(loading) return <p>Loading...</p>
@@ -63,8 +71,10 @@ class Dashboard extends Component {
 
         return (
           <Col>
-            <ListView listItems={myOpenTasks} title={"Open Tasks Assigned To Me"}/>
-            <ListView listItems={mySubscriptions} title={"Open Tasks I'm Subscribed To"}/>
+            <ListView listItems={myOpenTasks} title={"Open Tasks Assigned To Me"} sortBy={this.state.sortBy} 
+                  updateSortBy={this.updateSortBy} />
+            <ListView listItems={mySubscriptions} title={"Open Tasks I'm Subscribed To"} sortBy={this.state.subSortBy} 
+                  updateSortBy={this.updateSubSortBy} />
           </Col>
         )
       }}

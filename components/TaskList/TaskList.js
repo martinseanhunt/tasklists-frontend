@@ -84,7 +84,7 @@ class TaskList extends Component {
     this.setState({ viewing: e })
   }
 
-  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy }) || console.log(sortBy)
+  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy })
 
   render() {
     const { slug } = this.props
