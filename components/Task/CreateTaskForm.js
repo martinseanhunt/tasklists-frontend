@@ -19,10 +19,7 @@ import Controls from '../styles/sidebar/Controls'
 
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
-
-import { TASKLIST_QUERY } from '../TaskList/TaskList'
-import { DASHBOARD_QUERY } from '../Dashboard/Dashboard'
-import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
+import clearCache from '../../utils/clearCache'
 
 // TODO PRIORITY refactor this in to multiple components
 
@@ -176,14 +173,7 @@ class CreateTaskForm extends Component {
     createTaskMutation({ variables: task })
   }
 
-  update = (proxy) => {
-    // Working but I'm not entirely sure why it's working now when it wasn't before
-    Object.keys(proxy.data.data).forEach((key) => {
-      if (key.match(/^Task/) || key.match(/^taskList/)) {
-        proxy.data.delete(key);
-      }
-    })
-  }
+  update = (cache) => clearCache(cache)
   
   onCompleted = async ({ createTask }) => {
     //props.client.resetStore() // working but coul dbe slow
