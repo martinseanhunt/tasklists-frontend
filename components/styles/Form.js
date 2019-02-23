@@ -23,6 +23,10 @@ const Form = styled.form`
     color: #9ea0a5;         
   }
 
+  label {
+      font-weight: ${({ boldLabel }) => boldLabel ? '500' : 'normal'};
+    }
+
   fieldset {
     padding: 0;
     border: none;

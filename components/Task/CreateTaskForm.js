@@ -224,35 +224,24 @@ class CreateTaskForm extends Component {
             </SectionHeader>
             <Row>
               <Col>
-                <Widget>
-                  <WidgetHeader notFixed>
-                    <div>
-                      <h3>Create a New Task</h3>
-                      <p>You're creating a task in the "LIST NAME" TaskList</p>
-                    </div>
-                  </WidgetHeader>
-                  <WidgetRow>
-                    <label htmlFor="title">Task Title
-                      <input 
-                        name="title"
-                        type="text"
-                        placeholder="This is a task title..."
-                        value={title}
-                        onChange={this.handleChange}
-                      />
-                    </label>
+                <label htmlFor="title">Task Title
+                  <input 
+                    name="title"
+                    type="text"
+                    placeholder="This is a task title..."
+                    value={title}
+                    onChange={this.handleChange}
+                  />
+                </label>
 
-                    <label htmlFor="title">Task Description
-                      <textarea
-                        name="description"
-                        placeholder="This is a task description..."
-                        value={description}
-                        onChange={this.handleChange}
-                      />
-                    </label>
-
-                  </WidgetRow>
-                </Widget>
+                <label htmlFor="title">Task Description
+                  <textarea
+                    name="description"
+                    placeholder="This is a task description..."
+                    value={description}
+                    onChange={this.handleChange}
+                  />
+                </label>
 
                 {customFields.length > 0 && (
                   <Widget marginTop>
@@ -392,15 +381,10 @@ class CreateTaskForm extends Component {
                 </Widget>
 
               </Col>
-              <Col division='fourths'>
-                <SidebarRow>
-                  
-                </SidebarRow>
-
+              <Col sidebar>
                 <SidebarRow>
                   <fieldset className="no-margin">
                     <label htmlFor="due">Task Due</label>
-                    <p>Set task to be due by, or on, date</p>
                       <Select 
                         options={[
                           {
@@ -436,7 +420,6 @@ class CreateTaskForm extends Component {
                 <SidebarRow>
                   <fieldset className="no-margin">
                     <label htmlFor="due">Priority Level</label>
-                    <p>Set priority</p>
                       <Select 
                         options={[
                           {
@@ -469,8 +452,7 @@ class CreateTaskForm extends Component {
                 
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>
-                    <label htmlFor="user">Assign Task</label>
-                    <p>Assign this task to:</p>
+                    <label htmlFor="user">Assign Task to user</label>
                     <AssignToUser name="user" onChange={this.handleUserChange}/>
                   </SidebarRow>
                 )}
