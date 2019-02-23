@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
-import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Select from 'react-select'
 
@@ -9,11 +8,9 @@ import { Router } from '../../routes'
 import { TASKCARD_FRAGMENT } from '../Dashboard/Dashboard'
 
 import Col from '../styles/grid/Col'
-import Widget from '../styles/widget/Widget'
-import WidgetHeader from '../styles/widget/WidgetHeader'
 import Button from '../styles/Button'
 import ListView from '../ListView/ListView'
-import TaskListIcon from '../common/TaskListIcon'
+import SectionHeader from '../layout/SectionHeader/SectionHeader'
 
 // TODO Ordering and filtering!
 
@@ -106,54 +103,38 @@ class TaskList extends Component {
 
           return (
             <>
-              <TaskListHeader>
-                <WidgetHeader fluidHeight>
-                  <Meta>
-                    <TaskListIcon 
-                      color={taskList.color || '#6758F3'} 
-                      name={taskList.name}
-                      large  
-                    />
-                    <div>
-                      <h2>{taskList.name}</h2>
-                      <p>{taskList.description}</p>
-                    </div>
-                  </Meta>
-                  
-                  <Controls>
-                    <label htmlFor='viewByStatus'> 
-                      <Select 
-                        value={this.state.viewing}
-                        options={[
-                          {
-                            value: 'open',
-                            label: 'Open Tasks',
-                          },
-                          {
-                            value: 'completed',
-                            label: 'Completed Tasks',
-                          },
-                          {
-                            value: 'cancelled',
-                            label: 'Cancelled Tasks',
-                          },
-                        ]} 
-                        onChange={this.handleViewingChange}
-                        name='viewing'
-                        styles={{ cursor: 'pointer' }}
-                        placeholder='Viewing Open Tasks'
-                      />
-                    </label>
-                    <Button 
-                      primary 
-                      onClick={() => Router.pushRoute('createTask', { taskListSlug: taskList.slug })}
-                    >
-                      <FontAwesomeIcon icon="plus" /> 
-                      New Task
-                    </Button>
-                  </Controls>
-                </WidgetHeader>
-              </TaskListHeader>
+              <SectionHeader taskList={taskList}>
+                <label htmlFor='viewByStatus'> 
+                  <Select 
+                    value={this.state.viewing}
+                    options={[
+                      {
+                        value: 'open',
+                        label: 'Open Tasks',
+                      },
+                      {
+                        value: 'completed',
+                        label: 'Completed Tasks',
+                      },
+                      {
+                        value: 'cancelled',
+                        label: 'Cancelled Tasks',
+                      },
+                    ]} 
+                    onChange={this.handleViewingChange}
+                    name='viewing'
+                    styles={{ cursor: 'pointer' }}
+                    placeholder='Viewing Open Tasks'
+                  />
+                </label>
+                <Button 
+                  primary 
+                  onClick={() => Router.pushRoute('createTask', { taskListSlug: taskList.slug })}
+                >
+                  <FontAwesomeIcon icon="plus" /> 
+                  New Task
+                </Button>
+              </SectionHeader>
             
               <Col>
                 <ListView 
@@ -170,42 +151,6 @@ class TaskList extends Component {
     )
   }
 }
-
-const TaskListHeader = styled(Widget)`
-  margin-bottom: 50px;
-  border: 0;
-`
-
-const Meta = styled.div`
-  display: flex;
-  align-items: flex-start;
-
-  div:first-child {
-    margin-right: 10px;
-    margin-top: 3px;
-  }
-
-  h2 {
-    margin-top: 3px;
-    margin-bottom: 5px;
-    font-size: 18px;
-    font-weight: 500;
-  }
-
-  p {
-    margin: 0;
-  }
-`
-
-const Controls = styled.div`
-  display: flex;
-  align-items: center;
-
-  label {
-    width: 230px;
-    margin-right: 15px;
-  }
-`
 
 export default TaskList
 export { TASKLIST_QUERY }

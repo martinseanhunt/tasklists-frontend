@@ -16,6 +16,7 @@ import Button from '../styles/Button'
 import WidgetFooter from '../styles/widget/WidgetFooter'
 import SidebarRow from '../styles/sidebar/SidebarRow'
 import Controls from '../styles/sidebar/Controls'
+import SectionHeader from '../layout/SectionHeader/SectionHeader'
 
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
@@ -201,6 +202,26 @@ class CreateTaskForm extends Component {
             noPadd 
             boldLabel
           >
+            <SectionHeader 
+              taskList={taskList}
+              title={`New Task`}
+              subTitle={`You're creating a task in ${taskList.name}`}
+            >
+              <Controls>
+                <Button style={{ display: 'none' }}>
+                  Cancel
+                </Button>
+
+                <Button 
+                  secondary
+                  onClick={() => this.createTask(createTask)}  
+                  disabled={loading}
+                  style={{ width: '200px' }}
+                >
+                  Create Task
+                </Button>
+              </Controls>
+            </SectionHeader>
             <Row>
               <Col>
                 <Widget>
@@ -373,19 +394,7 @@ class CreateTaskForm extends Component {
               </Col>
               <Col division='fourths'>
                 <SidebarRow>
-                  <Controls>
-                    <Button>
-                      Cancel
-                    </Button>
-
-                    <Button 
-                      secondary
-                      onClick={() => this.createTask(createTask)}  
-                      disabled={loading}
-                    >
-                      Create Task
-                    </Button>
-                  </Controls>
+                  
                 </SidebarRow>
 
                 <SidebarRow>

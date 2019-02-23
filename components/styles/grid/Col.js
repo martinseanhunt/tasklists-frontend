@@ -7,7 +7,7 @@ const Col = styled.div`
   ${({marginBottom}) => marginBottom && `
     margin-bottom: 20px;
   `}
-  
+
   ${({division}) => division === 'halves' && `
     flex-basis: calc(50% - 30px);
     width: calc(50% - 30px);

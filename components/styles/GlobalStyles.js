@@ -27,7 +27,7 @@ export default createGlobalStyle`
     background: #29d;
 
     position: fixed;
-    z-index: 1031;
+    z-index: 99999;
     top: 0;
     left: 0;
 

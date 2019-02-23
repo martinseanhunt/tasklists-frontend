@@ -14,7 +14,6 @@ class Sidebar extends Component {
 
         <h2>Menu</h2>
         <Link href="/"><a>Dashboard</a></Link>
-        <Link href="/"><a>Dashboard</a></Link>
       </SimpleBar>
     </SidebarContainer>
   )

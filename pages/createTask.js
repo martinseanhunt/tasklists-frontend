@@ -3,7 +3,6 @@ import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 
 import User from '../components/providers/User'
-import SubHeader from '../components/layout/SubHeader'
 import CreateTaskForm from '../components/Task/CreateTaskForm'
 import Container from '../components/styles/grid/Container'
 
@@ -43,18 +42,12 @@ class CreateTask extends Component {
               if(!data.taskList) return <p>NoData</p>
               
               return (
-                <>
-                  <SubHeader 
-                    title="Create New Task"
-                    rightText={`${data.taskList.name}`}
+                <Container noPadd>
+                  <CreateTaskForm 
+                    taskList={data.taskList}
+                    user={userData.me}
                   />
-                  <Container>
-                    <CreateTaskForm 
-                      taskList={data.taskList}
-                      user={userData.me}
-                    />
-                  </Container>
-                </>
+                </Container>
               )
             }}
           </Query>
