@@ -327,7 +327,8 @@ class TaskPage extends Component {
                                       )}
                                     </div>
                                     
-                                    <Confetti active={ ['COMPLETED'].includes(task.status) } config={ confettiConfig }/>
+                                    <div style={{ textAlign: 'center' }}>
+                                    <Confetti active={ ['COMPLETED'].includes(task.status) } config={ confettiConfig } />
                                     {['COMPLETED', 'CLOSED'].includes(task.status) ? (
                                       <Button primary
                                         onClick={updateTaskStatus}
@@ -343,7 +344,8 @@ class TaskPage extends Component {
                                         Complet{updateStatus.loading ? 'ing' : 'e'} Task
                                       </Button>
                                     )}
-                                    
+                                    </div>
+
                                   </WidgetFooter>
                                 ) 
                               }}

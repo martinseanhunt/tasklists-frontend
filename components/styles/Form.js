@@ -7,7 +7,7 @@ const Form = styled.form`
   flex-basis: 50%;
   padding: ${({noPadd}) => noPadd ? '0' : '32px 40px'};
 
-  label, input {
+  input {
     display: block;
   }
 
@@ -23,10 +23,6 @@ const Form = styled.form`
     color: #9ea0a5;         
   }
 
-  label {
-      font-weight: ${({ boldLabel }) => boldLabel ? '500' : 'normal'};
-    }
-
   fieldset {
     padding: 0;
     border: none;
@@ -37,10 +33,6 @@ const Form = styled.form`
       margin: 0;
     }
 
-    label {
-      font-weight: ${({ boldLabel }) => boldLabel ? '500' : 'normal'};
-    }
-    
     .flex {
       display: flex;
       flex-wrap: wrap;
@@ -138,13 +130,15 @@ const Form = styled.form`
     cursor: pointer;
   }
 
-  label {
+  label.heading {
     font-size: 1.2rem;
     text-transform: uppercase;
     color: #9ea0a5;
     font-weight: 500;
     display: block;
     margin-top: 20px;
+    display: block;
+    font-weight: ${({ boldLabel }) => boldLabel ? '500' : 'normal'};
 
     &.hidden {
       visibility: hidden;

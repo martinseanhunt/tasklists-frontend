@@ -18,6 +18,12 @@ import SidebarRow from '../styles/sidebar/SidebarRow'
 import Controls from '../styles/sidebar/Controls'
 import SectionHeader from '../layout/SectionHeader/SectionHeader'
 
+// Allows RTE to access window - doesn' need to be server rendered
+import dynamic from 'next/dynamic'
+const RichTextEditor = dynamic(() => import('../common/RichTextEditorCK'), {
+  ssr: false
+})
+
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
 import clearCache from '../../utils/clearCache'
@@ -224,7 +230,7 @@ class CreateTaskForm extends Component {
             </SectionHeader>
             <Row>
               <Col>
-                <label htmlFor="title">Task Title
+                <label htmlFor="title" className="heading">Task Title
                   <input 
                     name="title"
                     type="text"
@@ -234,14 +240,9 @@ class CreateTaskForm extends Component {
                   />
                 </label>
 
-                <label htmlFor="title">Task Description
-                  <textarea
-                    name="description"
-                    placeholder="This is a task description..."
-                    value={description}
-                    onChange={this.handleChange}
-                  />
+                <label htmlFor="title" className="heading">Task Description
                 </label>
+                <RichTextEditor />
 
                 {customFields.length > 0 && (
                   <Widget marginTop>
@@ -320,7 +321,7 @@ class CreateTaskForm extends Component {
                         >
                           
                           <div className="flex flex--removable">
-                            <label htmlFor={assetTitleName}>{!i && 'Attachment title'}
+                            <label htmlFor={assetTitleName}  className="heading">{!i && 'Attachment title'}
                               <input 
                                 name={assetTitleName}
                                 type="text"
@@ -332,7 +333,7 @@ class CreateTaskForm extends Component {
                               />
                             </label>
                             
-                            <label htmlFor={assetName}>{!i && 'Attachment URL'}
+                            <label htmlFor={assetName}  className="heading">{!i && 'Attachment URL'}
                               <input 
                                 name={assetName}
                                 type="text"
@@ -344,7 +345,7 @@ class CreateTaskForm extends Component {
                               />
                             </label>
 
-                            <label htmlFor={assetTypeName}>{!i && 'Attachment Type'}
+                            <label htmlFor={assetTypeName}  className="heading">{!i && 'Attachment Type'}
                               <select
                                 name={assetTypeName}
                                 onChange={this.handleChange}
@@ -384,7 +385,7 @@ class CreateTaskForm extends Component {
               <Col sidebar>
                 <SidebarRow>
                   <fieldset className="no-margin">
-                    <label htmlFor="due">Task Due</label>
+                    <label htmlFor="due"  className="heading">Task Due</label>
                       <Select 
                         options={[
                           {
@@ -406,7 +407,7 @@ class CreateTaskForm extends Component {
                       />
                   </fieldset>
 
-                  <label htmlFor="date" className="hidden">Date:</label>
+                  <label htmlFor="date" className="hidden heading">Date:</label>
                     {!dateDisabled && (
                       <DatePicker 
                         animate={!dateDisabled}
@@ -419,7 +420,7 @@ class CreateTaskForm extends Component {
 
                 <SidebarRow>
                   <fieldset className="no-margin">
-                    <label htmlFor="due">Priority Level</label>
+                    <label htmlFor="due"  className="heading">Priority Level</label>
                       <Select 
                         options={[
                           {
@@ -452,7 +453,7 @@ class CreateTaskForm extends Component {
                 
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>
-                    <label htmlFor="user">Assign Task to user</label>
+                    <label htmlFor="user"  className="heading">Assign Task to user</label>
                     <AssignToUser name="user" onChange={this.handleUserChange}/>
                   </SidebarRow>
                 )}
