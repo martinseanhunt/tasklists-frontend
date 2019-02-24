@@ -1,403 +1,129 @@
 import React from 'react'
-import { Editor } from 'slate-react'
-import { Value } from 'slate'
-import { isKeyHotkey } from 'is-hotkey'
+import { EditorState, RichUtils, convertToRaw } from 'draft-js'
+import Editor from 'draft-js-plugins-editor'
+import createMentionPlugin, {
+  defaultSuggestionsFilter
+} from 'draft-js-mention-plugin'
 
-// Create our initial value...
-const initialValue = Value.fromJSON({
-  "document": {
-    "nodes": [
-      {
-        "object": "block",
-        "type": "paragraph",
-        "nodes": [
-          {
-            "object": "text",
-            "leaves": [
-              {
-                "text": "This is editable "
-              },
-              {
-                "text": "rich",
-                "marks": [
-                  {
-                    "type": "bold"
-                  }
-                ]
-              },
-              {
-                "text": " text, "
-              },
-              {
-                "text": "much",
-                "marks": [
-                  {
-                    "type": "italic"
-                  }
-                ]
-              },
-              {
-                "text": " better than a "
-              },
-              {
-                "text": "<textarea>",
-                "marks": [
-                  {
-                    "type": "code"
-                  }
-                ]
-              },
-              {
-                "text": "!"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "object": "block",
-        "type": "paragraph",
-        "nodes": [
-          {
-            "object": "text",
-            "leaves": [
-              {
-                "text":
-                  "Since it's rich text, you can do things like turn a selection of text "
-              },
-              {
-                "text": "bold",
-                "marks": [
-                  {
-                    "type": "bold"
-                  }
-                ]
-              },
-              {
-                "text":
-                  ", or add a semantically rendered block quote in the middle of the page, like this:"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "object": "block",
-        "type": "block-quote",
-        "nodes": [
-          {
-            "object": "text",
-            "leaves": [
-              {
-                "text": "A wise quote."
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "object": "block",
-        "type": "paragraph",
-        "nodes": [
-          {
-            "object": "text",
-            "leaves": [
-              {
-                "text": "Try it out for yourself!"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-})
+import 'draft-js-mention-plugin/lib/plugin.css'
 
-const DEFAULT_NODE = 'paragraph'
-
-const isBoldHotkey = isKeyHotkey('mod+b')
-const isItalicHotkey = isKeyHotkey('mod+i')
-const isUnderlinedHotkey = isKeyHotkey('mod+u')
-const isCodeHotkey = isKeyHotkey('mod+`')
-
-// Define our app...
 class RichTextEditor extends React.Component {
-  // Set the initial value when the app is first constructed.
+  constructor(props) {
+    super(props);
+
+    this.mentionPlugin = createMentionPlugin()
+  }
+
   state = {
-    value: initialValue,
+    editorState: EditorState.createEmpty(),
+    suggestions: mentions
   }
 
-  /**
-   * Check if the current selection has a mark with `type` in it.
-   *
-   * @param {String} type
-   * @return {Boolean}
-   */
-
-  hasMark = type => {
-    const { value } = this.state
-    return value.activeMarks.some(mark => mark.type == type)
+  onChange = (editorState) => {
+    this.setState({ editorState })
   }
 
-    /**
-   * Check if the any of the currently selected blocks are of `type`.
-   *
-   * @param {String} type
-   * @return {Boolean}
-   */
-
-  hasBlock = type => {
-    const { value } = this.state
-    return value.blocks.some(node => node.type == type)
+  handleKeyCommand = (command) => {
+    const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
+    if (newState) {
+        this.onChange(newState);
+        return 'handled';
+    }
+    return 'not-handled';
   }
 
-   /**
-   * Store a reference to the `editor`.
-   *
-   * @param {Editor} editor
-   */
+  onSearchChange = ({ value }) => {
+    this.setState({
+      suggestions: defaultSuggestionsFilter(value, mentions),
+    });
+  };
 
-  ref = editor => {
-    this.editor = editor
+  onAddMention = () => {
+    // get the mention object selected
   }
 
-  /**
-   * Render.
-   *
-   * @return {Element}
-   */
+  onUnderlineClick = () => {
+    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'UNDERLINE'));
+  }
 
+  onBoldClick = () => {
+    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD'))
+  }
+
+  onItalicClick = () => {
+    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'ITALIC'))
+  }
+
+  focus = () => {
+    this.editor.focus();
+  }
+ 
   render() {
+    const { MentionSuggestions } = this.mentionPlugin
+    const plugins = [this.mentionPlugin]
+
     return (
-      <div>
+      <div onClick={this.focus}>
         <div>
-          {this.renderMarkButton('bold', 'format_bold')}
-          {this.renderMarkButton('italic', 'format_italic')}
-          {this.renderMarkButton('underlined', 'format_underlined')}
-          {this.renderMarkButton('code', 'code')}
-          {this.renderBlockButton('heading-one', 'looks_one')}
-          {this.renderBlockButton('heading-two', 'looks_two')}
-          {this.renderBlockButton('block-quote', 'format_quote')}
-          {this.renderBlockButton('numbered-list', 'format_list_numbered')}
-          {this.renderBlockButton('bulleted-list', 'format_list_bulleted')}
+          <button onClick={this.onUnderlineClick}>U</button>
+          <button onClick={this.onBoldClick}><b>B</b></button>
+          <button onClick={this.onItalicClick}><em>I</em></button>
         </div>
         <Editor
-          spellCheck
-          autoFocus
-          placeholder="Enter some rich text..."
-          ref={this.ref}
-          value={this.state.value}
+          editorState={this.state.editorState}
+          handleKeyCommand={this.handleKeyCommand}
           onChange={this.onChange}
-          onKeyDown={this.onKeyDown}
-          renderNode={this.renderNode}
-          renderMark={this.renderMark}
+          plugins={plugins}
+          ref={element => {
+            this.editor = element;
+          }}
         />
+        <MentionSuggestions
+          onSearchChange={this.onSearchChange}
+          suggestions={this.state.suggestions}
+          onAddMention={this.onAddMention}
+        />
+        <button onClick={() => {
+          // const data = convertToRaw(this.state.editorState)
+          console.log(JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent())))
+        }}>Test RTE</button>
       </div>
     )
   }
 
-  /**
-   * Render a mark-toggling toolbar button.
-   *
-   * @param {String} type
-   * @param {String} icon
-   * @return {Element}
-   */
-
-  renderMarkButton = (type, icon) => {
-    const isActive = this.hasMark(type)
-
-    return (
-      <button
-        active={isActive}
-        onMouseDown={event => this.onClickMark(event, type)}
-      >
-        <div>{icon}</div>
-      </button>
-    )
-  }
-
-  /**
-   * Render a block-toggling toolbar button.
-   *
-   * @param {String} type
-   * @param {String} icon
-   * @return {Element}
-   */
-
-  renderBlockButton = (type, icon) => {
-    let isActive = this.hasBlock(type)
-
-    if (['numbered-list', 'bulleted-list'].includes(type)) {
-      const { value: { document, blocks } } = this.state
-
-      if (blocks.size > 0) {
-        const parent = document.getParent(blocks.first().key)
-        isActive = this.hasBlock('list-item') && parent && parent.type === type
-      }
-    }
-
-    return (
-      <button
-        active={isActive}
-        onMouseDown={event => this.onClickBlock(event, type)}
-      >
-        <div>{icon}</div>
-      </button>
-    )
-  }
-
-  /**
-   * Render a Slate node.
-   *
-   * @param {Object} props
-   * @return {Element}
-   */
-
-  renderNode = (props, editor, next) => {
-    const { attributes, children, node } = props
-
-    switch (node.type) {
-      case 'block-quote':
-        return <blockquote {...attributes}>{children}</blockquote>
-      case 'bulleted-list':
-        return <ul {...attributes}>{children}</ul>
-      case 'heading-one':
-        return <h1 {...attributes}>{children}</h1>
-      case 'heading-two':
-        return <h2 {...attributes}>{children}</h2>
-      case 'list-item':
-        return <li {...attributes}>{children}</li>
-      case 'numbered-list':
-        return <ol {...attributes}>{children}</ol>
-      default:
-        return next()
-    }
-  }
-
-  /**
-   * Render a Slate mark.
-   *
-   * @param {Object} props
-   * @return {Element}
-   */
-
-  renderMark = (props, editor, next) => {
-    const { children, mark, attributes } = props
-
-    switch (mark.type) {
-      case 'bold':
-        return <strong {...attributes}>{children}</strong>
-      case 'code':
-        return <code {...attributes}>{children}</code>
-      case 'italic':
-        return <em {...attributes}>{children}</em>
-      case 'underlined':
-        return <u {...attributes}>{children}</u>
-      default:
-        return next()
-    }
-  }
-
-  /**
-   * On change, save the new `value`.
-   *
-   * @param {Editor} editor
-   */
-
-  onChange = ({ value }) => {
-    this.setState({ value })
-  }
-
-  /**
-   * On key down, if it's a formatting command toggle a mark.
-   *
-   * @param {Event} event
-   * @param {Editor} editor
-   * @return {Change}
-   */
-
-  onKeyDown = (event, editor, next) => {
-    let mark
-
-    if (isBoldHotkey(event)) {
-      mark = 'bold'
-    } else if (isItalicHotkey(event)) {
-      mark = 'italic'
-    } else if (isUnderlinedHotkey(event)) {
-      mark = 'underlined'
-    } else if (isCodeHotkey(event)) {
-      mark = 'code'
-    } else {
-      return next()
-    }
-
-    event.preventDefault()
-    editor.toggleMark(mark)
-  }
-
-  /**
-   * When a mark button is clicked, toggle the current mark.
-   *
-   * @param {Event} event
-   * @param {String} type
-   */
-
-  onClickMark = (event, type) => {
-    event.preventDefault()
-    this.editor.toggleMark(type)
-  }
-
-  /**
-   * When a block button is clicked, toggle the block type.
-   *
-   * @param {Event} event
-   * @param {String} type
-   */
-
-  onClickBlock = (event, type) => {
-    event.preventDefault()
-
-    const { editor } = this
-    const { value } = editor
-    const { document } = value
-
-    // Handle everything but list buttons.
-    if (type != 'bulleted-list' && type != 'numbered-list') {
-      const isActive = this.hasBlock(type)
-      const isList = this.hasBlock('list-item')
-
-      if (isList) {
-        editor
-          .setBlocks(isActive ? DEFAULT_NODE : type)
-          .unwrapBlock('bulleted-list')
-          .unwrapBlock('numbered-list')
-      } else {
-        editor.setBlocks(isActive ? DEFAULT_NODE : type)
-      }
-    } else {
-      // Handle the extra wrapping required for list buttons.
-      const isList = this.hasBlock('list-item')
-      const isType = value.blocks.some(block => {
-        return !!document.getClosest(block.key, parent => parent.type == type)
-      })
-
-      if (isList && isType) {
-        editor
-          .setBlocks(DEFAULT_NODE)
-          .unwrapBlock('bulleted-list')
-          .unwrapBlock('numbered-list')
-      } else if (isList) {
-        editor
-          .unwrapBlock(
-            type == 'bulleted-list' ? 'numbered-list' : 'bulleted-list'
-          )
-          .wrapBlock(type)
-      } else {
-        editor.setBlocks('list-item').wrapBlock(type)
-      }
-    }
-  }
 }
 
 export default RichTextEditor
+
+const mentions = [
+  {
+    name: 'Matthew Russell',
+    link: 'https://twitter.com/mrussell247',
+    avatar: 'https://pbs.twimg.com/profile_images/517863945/mattsailing_400x400.jpg',
+  },
+  {
+    name: 'Julian Krispel-Samsel',
+    link: 'https://twitter.com/juliandoesstuff',
+    avatar: 'https://avatars2.githubusercontent.com/u/1188186?v=3&s=400',
+  },
+  {
+    name: 'Jyoti Puri',
+    link: 'https://twitter.com/jyopur',
+    avatar: 'https://avatars0.githubusercontent.com/u/2182307?v=3&s=400',
+  },
+  {
+    name: 'Max Stoiber',
+    link: 'https://twitter.com/mxstbr',
+    avatar: 'https://pbs.twimg.com/profile_images/763033229993574400/6frGyDyA_400x400.jpg',
+  },
+  {
+    name: 'Nik Graf',
+    link: 'https://twitter.com/nikgraf',
+    avatar: 'https://avatars0.githubusercontent.com/u/223045?v=3&s=400',
+  },
+  {
+    name: 'Pascal Brandt',
+    link: 'https://twitter.com/psbrandt',
+    avatar: 'https://pbs.twimg.com/profile_images/688487813025640448/E6O6I011_400x400.png',
+  },
+]
