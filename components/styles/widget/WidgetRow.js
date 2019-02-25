@@ -8,6 +8,10 @@ const WidgetRow = styled.div`
     max-height: 70vh; 
     overflow: scroll;
   `}
+  
+  ${({ formPadd }) => formPadd && `
+    padding: 16px;
+  `}
 `
 
 export default WidgetRow

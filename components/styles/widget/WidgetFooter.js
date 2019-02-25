@@ -12,6 +12,10 @@ const WidgetFooter = styled.footer`
     padding: 30px;
     display: block;
   `}
+
+  ${({ formPadd }) => formPadd && `
+    padding: 16px;
+  `}
 `
 
 export default WidgetFooter

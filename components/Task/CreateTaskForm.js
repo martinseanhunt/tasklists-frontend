@@ -317,16 +317,14 @@ class CreateTaskForm extends Component {
                   </Widget>
                 )}
                 
-                <Widget marginTop>
-                  <WidgetHeader notFixed>
-                    <label htmlFor="taskListFields" className="inside-header">
-                      <h3>Attachments</h3>
-                      <p>Attach images, videos and other files to this task</p>
-                    </label>
-                  </WidgetHeader>
-                  <WidgetRow noPaddTop>
+
+                <label htmlFor="taskListFields" className="heading" style={{ display: 'block', marginBottom: '10px' }}>
+                  Attachments
+                </label>
+                <Widget>
+                  <WidgetRow formPadd>
                     {!assets.length && 
-                      <p style={{textAlign: 'center'}}>No attachments yet, click the button below to add some</p>}
+                      <p>No attachments yet, click the button below to add some</p>}
 
                     {assets.map((_, i) => {
                       const assetName = 'assetUrl' + i
@@ -389,7 +387,7 @@ class CreateTaskForm extends Component {
                     })}
                   </WidgetRow>
 
-                  <WidgetFooter>
+                  <WidgetFooter formPadd>
                     <div></div>
                     <Button 
                       onClick={e => this.addAsset(e, user)}
