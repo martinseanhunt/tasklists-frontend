@@ -1,11 +1,32 @@
 import React from 'react'
-import { EditorState, RichUtils, convertToRaw } from 'draft-js'
+import { RichUtils } from 'draft-js'
 import Editor from 'draft-js-plugins-editor'
 import createMentionPlugin, {
   defaultSuggestionsFilter
 } from 'draft-js-mention-plugin'
+import createToolbarPlugin from 'draft-js-static-toolbar-plugin'
+import styled from 'styled-components'
+
+// TODO add acnchors and auto linkify
+// https://www.draft-js-plugins.com/plugin/anchor
+// https://www.draft-js-plugins.com/plugin/linkify
+
+// TODO implement more buttons https://www.draft-js-plugins.com/plugin/static-toolbar
+
+import {
+  ItalicButton,
+  BoldButton,
+  UnderlineButton,
+  UnorderedListButton,
+  OrderedListButton,
+  BlockquoteButton,
+} from 'draft-js-buttons';
 
 import 'draft-js-mention-plugin/lib/plugin.css'
+import 'draft-js-static-toolbar-plugin/lib/plugin.css'
+
+const toolbarPlugin = createToolbarPlugin()
+const { Toolbar } = toolbarPlugin
 
 class RichTextEditor extends React.Component {
   constructor(props) {
@@ -13,20 +34,11 @@ class RichTextEditor extends React.Component {
 
     this.mentionPlugin = createMentionPlugin()
   }
-
-  state = {
-    editorState: EditorState.createEmpty(),
-    suggestions: mentions
-  }
-
-  onChange = (editorState) => {
-    this.setState({ editorState })
-  }
-
+  
   handleKeyCommand = (command) => {
-    const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
+    const newState = RichUtils.handleKeyCommand(this.props.editorState, command)
     if (newState) {
-        this.onChange(newState);
+        this.props.onChange(newState);
         return 'handled';
     }
     return 'not-handled';
@@ -34,96 +46,108 @@ class RichTextEditor extends React.Component {
 
   onSearchChange = ({ value }) => {
     this.setState({
-      suggestions: defaultSuggestionsFilter(value, mentions),
-    });
-  };
+      suggestions: defaultSuggestionsFilter(value, this.props.suggestions),
+    })
+  }
 
   onAddMention = () => {
     // get the mention object selected
   }
 
+  /* Don't need any odf this becuse I'm using the static toolbar plugin
+
   onUnderlineClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'UNDERLINE'));
+    this.props.onChange(RichUtils.toggleInlineStyle(this.props.editorState, 'UNDERLINE'))
   }
 
   onBoldClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD'))
+    this.props.onChange(RichUtils.toggleInlineStyle(this.props.editorState, 'BOLD'))
   }
 
   onItalicClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'ITALIC'))
+    this.props.onChange(RichUtils.toggleInlineStyle(this.props.editorState, 'ITALIC'))
   }
 
+  onHeadingClick = () => {
+    // TODO get this working right. It's adding the h3 style but how to turn it off on enter? 
+    this.props.onChange(RichUtils.toggleBlockType(this.props.editorState, {label: 'H3', style: 'header-three'}))
+  }
+
+  */
+
   focus = () => {
-    this.editor.focus();
+    this.editor.focus()
   }
  
   render() {
     const { MentionSuggestions } = this.mentionPlugin
-    const plugins = [this.mentionPlugin]
+    const plugins = [this.mentionPlugin, toolbarPlugin]
 
     return (
-      <div onClick={this.focus}>
-        <div>
-          <button onClick={this.onUnderlineClick}>U</button>
-          <button onClick={this.onBoldClick}><b>B</b></button>
-          <button onClick={this.onItalicClick}><em>I</em></button>
+      <EditorContainer>
+        <div onClick={this.focus}>
+          <Toolbar>
+            {
+              (externalProps) => (
+                <div>
+                  <BoldButton {...externalProps} />
+                  <ItalicButton {...externalProps} />
+                  <UnderlineButton {...externalProps} />
+                  <UnorderedListButton {...externalProps} />
+                  <OrderedListButton {...externalProps} />
+                </div>
+              )
+            }
+          </Toolbar>
+          <Editor
+            editorState={this.props.editorState}
+            handleKeyCommand={this.handleKeyCommand}
+            onChange={this.props.onChange}
+            plugins={plugins}
+            ref={element => {
+              this.editor = element;
+            }}
+          />
+          <MentionSuggestions
+            onSearchChange={this.onSearchChange}
+            suggestions={this.props.suggestions}
+            onAddMention={this.onAddMention}
+          />
         </div>
-        <Editor
-          editorState={this.state.editorState}
-          handleKeyCommand={this.handleKeyCommand}
-          onChange={this.onChange}
-          plugins={plugins}
-          ref={element => {
-            this.editor = element;
-          }}
-        />
-        <MentionSuggestions
-          onSearchChange={this.onSearchChange}
-          suggestions={this.state.suggestions}
-          onAddMention={this.onAddMention}
-        />
-        <button onClick={() => {
-          // const data = convertToRaw(this.state.editorState)
-          console.log(JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent())))
-        }}>Test RTE</button>
-      </div>
+      </EditorContainer>
     )
   }
 
 }
 
-export default RichTextEditor
+const EditorContainer = styled.div`
+  border: 1px solid #e2e5ed;
+  padding: 16px;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: inset 0 1px 2px 0 rgba(102,113,123,0.1);
+  margin-top: 10px;
 
-const mentions = [
-  {
-    name: 'Matthew Russell',
-    link: 'https://twitter.com/mrussell247',
-    avatar: 'https://pbs.twimg.com/profile_images/517863945/mattsailing_400x400.jpg',
-  },
-  {
-    name: 'Julian Krispel-Samsel',
-    link: 'https://twitter.com/juliandoesstuff',
-    avatar: 'https://avatars2.githubusercontent.com/u/1188186?v=3&s=400',
-  },
-  {
-    name: 'Jyoti Puri',
-    link: 'https://twitter.com/jyopur',
-    avatar: 'https://avatars0.githubusercontent.com/u/2182307?v=3&s=400',
-  },
-  {
-    name: 'Max Stoiber',
-    link: 'https://twitter.com/mxstbr',
-    avatar: 'https://pbs.twimg.com/profile_images/763033229993574400/6frGyDyA_400x400.jpg',
-  },
-  {
-    name: 'Nik Graf',
-    link: 'https://twitter.com/nikgraf',
-    avatar: 'https://avatars0.githubusercontent.com/u/223045?v=3&s=400',
-  },
-  {
-    name: 'Pascal Brandt',
-    link: 'https://twitter.com/psbrandt',
-    avatar: 'https://pbs.twimg.com/profile_images/688487813025640448/E6O6I011_400x400.png',
-  },
-]
+  .draftJsToolbar__toolbar__dNtBH {
+    background: #fbfbfb;
+    padding: 1px 0;
+  }
+
+  .DraftEditor-root {
+    margin-top: 16px;
+    cursor: text;
+    margin-bottom: 2em;
+    max-width: 100%;
+  }
+
+  .public-DraftEditor-content {
+    min-height: 140px;
+  }
+
+  .draftJsToolbar__buttonWrapper__1Dmqh:nth-of-type(3) svg{
+    position: relative;
+    top: 1px;
+  }
+`
+
+export default RichTextEditor

@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { Mutation, withApollo } from 'react-apollo'
+import { Mutation, withApollo, Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
 import moment from 'moment'
+import { EditorState, convertToRaw } from 'draft-js'
 
 import { Router } from '../../routes'
 
@@ -29,7 +30,7 @@ import AssignToUser from './AssignToUser'
 import clearCache from '../../utils/clearCache'
 
 import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
-
+import { ALL_USERS_QUERY } from '../settings/Users'
 
 // TODO PRIORITY refactor this in to multiple components
 
@@ -45,6 +46,7 @@ const CREATE_TASK_MUTATION = gql`
   mutation CREATE_TASK_MUTATION(
     $title: String!
     $description: String!
+    $richText: String
     $due: TaskDue
     $dueDate: String
     $priority: TaskPriority
@@ -56,6 +58,7 @@ const CREATE_TASK_MUTATION = gql`
     createTask(
       title: $title
       description: $description
+      richText: $richText
       due: $due
       dueDate: $dueDate
       assignedTo: $assignedTo
@@ -79,10 +82,10 @@ class CreateTaskForm extends Component {
     dueDate: null,
     priority: 'LOW',
     title: '',
-    description: '',
     assets: [],
     assignedTo: '',
-    customFields: []
+    customFields: [],
+    editorState: EditorState.createEmpty(),
   }
 
   handleChange = (e) => {    
@@ -162,7 +165,7 @@ class CreateTaskForm extends Component {
   createTask = (createTaskMutation) => {
     // TODO this makes sense to me but not sure it would to others... refactor
 
-    let { dueDate, customFields, due } = this.state
+    let { dueDate, customFields, due, editorState } = this.state
     
     customFields = customFields 
       ? customFields
@@ -171,13 +174,17 @@ class CreateTaskForm extends Component {
           })
         )
       : null
+
+    const ContentState = editorState.getCurrentContent()
     
     const task = { 
       ...this.state,
       taskListSlug: this.props.taskList.slug,
       due: due ? due : null,
       dueDate: dueDate ? dueDate : null,
-      customFields
+      customFields,
+      description: ContentState.getPlainText(),
+      richText: JSON.stringify(convertToRaw(ContentState))
     }
 
     createTaskMutation({ variables: task })
@@ -242,7 +249,20 @@ class CreateTaskForm extends Component {
 
                 <label htmlFor="title" className="heading">Task Description
                 </label>
-                <RichTextEditor />
+
+                <Query query={ALL_USERS_QUERY}>
+                  {({data, error, loading}) => (!error && !loading) ? (
+                    <RichTextEditor 
+                      editorState={this.state.editorState} 
+                      suggestions={data.users.map(user => ({
+                        ...user,
+                        avatar: user.avatar || '/static/userprofile.jfif'
+                      }))}  
+                      onChange={(editorState) => this.setState({ editorState })}
+                    />
+                  ) : <p>Loading...</p>}
+                    
+                </Query>
 
                 {customFields.length > 0 && (
                   <Widget marginTop>

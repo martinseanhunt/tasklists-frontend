@@ -6,6 +6,8 @@ import moment from 'moment'
 import { Link } from '../routes'
 import styled from 'styled-components'
 import Confetti from 'react-dom-confetti'
+import {stateToHTML} from 'draft-js-export-html'
+import { convertFromRaw } from 'draft-js'
 
 import { Router } from '../routes'
 
@@ -53,6 +55,7 @@ const TASK_QUERY = gql`
       id
       title
       description
+      richText
       createdBy {
         name
         id
@@ -284,7 +287,28 @@ class TaskPage extends Component {
                           </TaskMeta>
 
                           <WidgetRow>
-                            <p>{task.description}</p>
+                            <Description>
+                              {task.richText 
+                                ? <div dangerouslySetInnerHTML={{ 
+                                    __html: stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
+                                      entityStyleFn: (entity) => {
+                                        const entityType = entity.get('type').toLowerCase();
+                                        if (entityType === 'mention') {
+                                          const data = entity.getData();
+                                          return {
+                                            element: 'span',
+                                            attributes: {
+                                              className: 'mention',
+                                            },
+                                            style: {
+                                            },
+                                          };
+                                        }
+                                      }
+                                    })
+                                  }}/>
+                                : <p>{task.description}</p>}
+                            </Description>
                           </WidgetRow>
 
                           {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
@@ -431,4 +455,18 @@ const TaskMeta = styled(WidgetRow)`
       }
     }
   }
+`
+
+const Description = styled.div`
+  span.mention {
+    background: rgba(103,88,243,0.08);
+    
+    &:before {
+      content: "@";
+      display: inline-block;
+      position: relative;
+      top: -1px;
+    }
+  }
+  
 `
