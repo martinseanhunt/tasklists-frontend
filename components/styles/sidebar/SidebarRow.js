@@ -9,13 +9,20 @@ const SidebarRow = styled.div`
     border-top: none;
   }
 
-  h4, label {
+  h4 {
     margin: 0;
     line-height: 1.5;
     font-size: 1.6rem;
     font-weight: 500;
     color: #3e3f42; 
     text-transform: none;
+  }
+
+  label {
+    text-transform: uppercase;
+    color: #9ea0a5;
+    font-weight: 500;
+    margin-bottom: 10px;
   }
 
   p {

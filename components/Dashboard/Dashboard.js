@@ -1,155 +1,93 @@
 import React, { Component } from 'react'
-import { Router, Link } from '../../routes'
 import styled from 'styled-components'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Query } from 'react-apollo'
+import gql from 'graphql-tag'
+import { adopt } from 'react-adopt'
 
-import TaskCard from '../TaskList/TaskCard'
-
-import Row from '../styles/grid/Row'
 import Col from '../styles/grid/Col'
-import Card from '../styles/card/Card'
-import CardInner from '../styles/card/CardInner'
-import CardFooter from '../styles/card/CardFooter'
+import ListView from '../ListView/ListView'
+
+const TASKCARD_FRAGMENT = `
+  id
+  title
+  status
+  description
+  createdBy {
+    name
+    avatar
+    id
+  }
+  assignedTo {
+    name
+    avatar
+    id
+  }
+  subscribedUsers {
+    id
+    name
+    avatar
+  }
+  createdAt
+  due
+  dueDate
+  priority
+  taskList {
+    name
+    slug
+    color
+  }
+`
+
+const DASHBOARD_QUERY = gql`
+  query DASHBOARD_QUERY($orderBy: String, $subOrderBy: String) {
+    myOpenTasks(orderBy: $orderBy) {
+      ${TASKCARD_FRAGMENT}
+    }
+    mySubscriptions(orderBy: $subOrderBy) {
+      ${TASKCARD_FRAGMENT}
+    }
+  }
+`
+
+// TODO improve error message
+// TODO improve loading
 
 class Dashboard extends Component {
-  calculateProgress = ({totalTaskCount, completedTaskCount}) => {
-    if(!totalTaskCount) return {
-      width: '0%',
-      noTasks: true
-    }
-
-    const percentage = Math.floor(completedTaskCount*100/totalTaskCount)
-    
-    return {
-      width:`calc(${percentage}% + 2px)`,
-      allTasksComplete: totalTaskCount && totalTaskCount === completedTaskCount,
-      noTasks: percentage === 0
-    }
+  state = {
+    sortBy: null,
+    subSortBy: null
   }
 
-  render() {
-    const { taskLists, myOpenTasks, mySubscriptions } = this.props
+  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy })
+  updateSubSortBy = (sortBy) => this.setState({ subSortBy: sortBy })
 
-    // TODO make progress bar it's own component - pass in the percentage
-    // as a prop
+  render = () => (
+    <Query query={DASHBOARD_QUERY} variables={{ orderBy: this.state.sortBy, subOrderBy: this.state.subSortBy }}>
+      {({data, error, loading}) => {
+        if(error) return <p>Something went wrong</p>
+        if(loading) return <p>Loading...</p>
 
-    // TODO allow user to toggle between list and card view
+        const {myOpenTasks, mySubscriptions} = data
 
-    // TODO allow an admin to create a list from this page
-
-    // TODO make sure cards are always the same height
-
-    // Work out how to divide the row
-    let division = 'halves'
-
-    if(taskLists.length > 2 ) 
-      division = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
-    let openTasksDivision = 'halves'
-
-    if(myOpenTasks.length > 2 ) 
-      openTasksDivision = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
-    let subscribedTasksDivision = 'halves'
-
-    if(mySubscriptions.length > 2 ) 
-      subscribedTasksDivision = taskLists.length % 3 === 0
-        ? 'thirds'
-        : 'fourths'
-
-    return (
-      <>
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="list"/>Lists</h2>
-        </SectionHeader>
-      </Col>
-      <Row marginBottom>
-        {taskLists && taskLists.map((taskList, i) => {
-          
-          const progress = this.calculateProgress(taskList)
-
-          return (
-            <Col key={taskList.id} division={division}>
-              <Card
-                onClick={() => Router.pushRoute('tasklist', { slug: taskList.slug })}
-                clickable
-              >
-                <CardInner>
-                  <div>
-                    <h3>{taskList.name}</h3>
-                    <p>{taskList.description.length > 100 
-                      ? taskList.description.substring(0,70) + '...'
-                      : taskList.description}</p>
-                  </div>
-                  
-                  <div>
-                    <span>Tasks Completed</span>
-                    <div className={`progress progress--${progress.allTasksComplete && 'complete'}`}>
-                      <span style={{ 
-                        width: progress.width, 
-                        display: progress.noTasks ? 'none' : 'block',
-                      }}></span>
-                    </div>
-                  </div>
-                </CardInner>
-                <CardFooter>
-                  <Link route="tasklist" params={{ slug: taskList.slug }}>
-                    <a>View Tasks →</a>
-                  </Link>
-                </CardFooter>
-              </Card>
-            </Col>
-          )}
-        )}
-      </Row>
-      
-      {myOpenTasks && myOpenTasks.length > 0 && (
-        <>
+        return (
           <Col>
-            <SectionHeader>
-              <h2><FontAwesomeIcon icon="list"/>Open Tasks Assigned To Me</h2>
-            </SectionHeader>
+            <ListView listItems={myOpenTasks} title={"Open Tasks Assigned To Me"} sortBy={this.state.sortBy} 
+                  updateSortBy={this.updateSortBy} />
+            <ListView listItems={mySubscriptions} title={"Open Tasks I'm Subscribed To"} sortBy={this.state.subSortBy} 
+                  updateSortBy={this.updateSubSortBy} />
           </Col>
-          <Row marginBottom>
-            {myOpenTasks && myOpenTasks.map((task, i) => {
-              return (
-                <TaskCard key={task.id} task={task} division={openTasksDivision}/>
-              )}
-            )}
-          </Row>
-        </>
-      )}
-      
-      {mySubscriptions && mySubscriptions.length > 0 && (
-        <>
-          <Col>
-            <SectionHeader>
-              <h2><FontAwesomeIcon icon="list"/>Open Tasks I'm Subscribed To</h2>
-            </SectionHeader>
-          </Col>
-          <Row marginBottom>
-            {mySubscriptions.map((task, i) => {
-              return (
-                <TaskCard key={task.id} task={task} division={subscribedTasksDivision}/>
-              )}
-            )}
-          </Row>
-        </>
-      )}
-      
-      </>
-    )
-  }
+        )
+      }}
+    </Query> 
+  )
 }
 
-const SectionHeader = styled.div`
-  padding: 30px 0;
+const SectionHeader = styled.div` 
+  padding: 0 0 10px 0;
+  margin: 0 0 30px 0;
   position: relative;
+  display: flex;
+  border-bottom: 1px solid #eaedf3;
   
   h2 {
     color: #3e3f42;
@@ -159,8 +97,10 @@ const SectionHeader = styled.div`
     background: #fbfbfd;
     z-index: 999;
     position: relative;
+    top: 1px;
     display: inline;
-    padding-right: 20px;
+    width: 350px;
+    min-width: 218px;
 
     svg {
       font-size: 1.4rem;
@@ -168,18 +108,36 @@ const SectionHeader = styled.div`
       color: #9ea0a5;
     }
   }
+`
 
-  &:after {
-    position: absolute;
-    width: 100%;
-    height: 1px;
+const Headings = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  text-align: center;
+  align-items: flex-end;
+
+  span {
+    color: #9ea0a5;
+    text-transform: uppercase;
+    font-size: 11px;
+    text-align: center;
     display: block;
-    background: #eaedf3;
-    content: "";
-    top: 50%;
-    left: 0;
-  }
+    flex: 1;
+    min-width: 70px;
 
+    &:first-of-type {
+      width: 90px;
+      flex: 0 1 90px;
+    }
+
+    &:nth-of-type(2) {
+      width: 90px;
+      flex: 0 1 90px;
+    }
+
+  }
 `
 
 export default Dashboard
+export { DASHBOARD_QUERY, TASKCARD_FRAGMENT }

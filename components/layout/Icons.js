@@ -10,7 +10,9 @@ import {
   faListAlt,
   faCheck, 
   faCheckSquare,
-  faPlus
+  faPlus,
+  faExclamationCircle
+
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faCode,
@@ -22,5 +24,6 @@ library.add(faCode,
   faListAlt,
   faCheck, 
   faCheckSquare,
-  faPlus
+  faPlus,
+  faExclamationCircle
   )

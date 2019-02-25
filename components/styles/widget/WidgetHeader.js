@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 
 const WidgetHeader = styled.header`
-  height: 75px;
+  height: ${({ fluidHeight }) => fluidHeight ? 'auto' : '75px'};
+  min-height: 75px;
   border-bottom: 1px solid #EAEDF3;
   padding: 0 30px;
   display: ${({noFlex}) => noFlex ? 'block' : 'flex'};

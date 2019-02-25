@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { Mutation } from 'react-apollo'
+import { Mutation, withApollo, Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
 import moment from 'moment'
+import { EditorState, convertToRaw } from 'draft-js'
 
 import { Router } from '../../routes'
 
@@ -16,12 +17,20 @@ import Button from '../styles/Button'
 import WidgetFooter from '../styles/widget/WidgetFooter'
 import SidebarRow from '../styles/sidebar/SidebarRow'
 import Controls from '../styles/sidebar/Controls'
+import SectionHeader from '../layout/SectionHeader/SectionHeader'
+
+// Allows RTE to access window - doesn' need to be server rendered
+import dynamic from 'next/dynamic'
+const RichTextEditor = dynamic(() => import('../common/RichTextEditor'), {
+  ssr: false
+})
 
 import DatePicker from '../Form/DatePicker'
 import AssignToUser from './AssignToUser'
+import clearCache from '../../utils/clearCache'
 
-import { TASKLIST_QUERY } from '../../pages/taskList'
-import { DASHBOARD_QUERY } from '../../pages/index'
+import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
+import { ALL_USERS_QUERY } from '../settings/Users'
 
 // TODO PRIORITY refactor this in to multiple components
 
@@ -37,8 +46,10 @@ const CREATE_TASK_MUTATION = gql`
   mutation CREATE_TASK_MUTATION(
     $title: String!
     $description: String!
-    $due: TaskDue!
+    $richText: String
+    $due: TaskDue
     $dueDate: String
+    $priority: TaskPriority
     $assignedTo: String
     $customFields: [CreateRelatedCustomField]
     $taskListSlug: String!
@@ -47,28 +58,34 @@ const CREATE_TASK_MUTATION = gql`
     createTask(
       title: $title
       description: $description
+      richText: $richText
       due: $due
       dueDate: $dueDate
       assignedTo: $assignedTo
       customFields: $customFields
       taskList: $taskListSlug
       assets: $assets
+      priority: $priority
     ){
       id
+      taskList{
+        slug
+      }
     }
   }
 `
 
 class CreateTaskForm extends Component {
   state = {
-    due: 'WHENPOSSIBLE',
+    due: null,
     dateDisabled: true,
     dueDate: null,
+    priority: 'LOW',
     title: '',
-    description: '',
     assets: [],
     assignedTo: '',
-    customFields: []
+    customFields: [],
+    editorState: EditorState.createEmpty(),
   }
 
   handleChange = (e) => {    
@@ -100,6 +117,10 @@ class CreateTaskForm extends Component {
 
   handleUserChange = (e) => this.setState({
     assignedTo: e ? e.value : null
+  })
+
+  handlePriorityChange = (e) => this.setState({
+    priority: e ? e.value : null
   })
 
   handleDueChange = (e) => this.setState({
@@ -144,7 +165,7 @@ class CreateTaskForm extends Component {
   createTask = (createTaskMutation) => {
     // TODO this makes sense to me but not sure it would to others... refactor
 
-    let { dueDate, customFields } = this.state
+    let { dueDate, customFields, due, editorState } = this.state
     
     customFields = customFields 
       ? customFields
@@ -153,19 +174,29 @@ class CreateTaskForm extends Component {
           })
         )
       : null
+
+    const ContentState = editorState.getCurrentContent()
     
     const task = { 
       ...this.state,
       taskListSlug: this.props.taskList.slug,
+      due: due ? due : null,
       dueDate: dueDate ? dueDate : null,
-      customFields
+      customFields,
+      description: ContentState.getPlainText(),
+      richText: JSON.stringify(convertToRaw(ContentState))
     }
 
     createTaskMutation({ variables: task })
   }
-
-  onCompleted = ({ createTask }) => 
-    Router.pushRoute('task', { id: createTask.id })
+  
+  onCompleted = async ({ createTask }) => {
+    //props.client.resetStore() // working but coul dbe slow
+    // props.client.resetStore() // not working
+    await clearCache(this.props.client.cache, true)
+    Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
+  }
+    
 
   render() {
     const { title, description, dueDate, dateDisabled, assets } = this.state
@@ -175,16 +206,8 @@ class CreateTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_TASK_MUTATION}
-        update={this.update}
         onCompleted={this.onCompleted}
-        refetchQueries={[{
-          query: TASKLIST_QUERY,
-          variables: {
-            slug: this.props.taskList.slug
-          }
-        },
-        { query: DASHBOARD_QUERY }
-      ]}
+        refetchQueries={[{ query: TASKLISTS_QUERY }]}
       >
         {( createTask, { error, loading } ) => (
           <Form 
@@ -192,37 +215,54 @@ class CreateTaskForm extends Component {
             noPadd 
             boldLabel
           >
+            <SectionHeader 
+              taskList={taskList}
+              title={`New Task`}
+              subTitle={`You're creating a task in ${taskList.name}`}
+            >
+              <Controls>
+                <Button style={{ display: 'none' }}>
+                  Cancel
+                </Button>
+
+                <Button 
+                  secondary
+                  onClick={() => this.createTask(createTask)}  
+                  disabled={loading}
+                  style={{ width: '200px' }}
+                >
+                  Create Task
+                </Button>
+              </Controls>
+            </SectionHeader>
             <Row>
               <Col>
-                <Widget>
-                  <WidgetHeader notFixed>
-                    <div>
-                      <h3>Create a New Task</h3>
-                      <p>You're creating a task in the "LIST NAME" TaskList</p>
-                    </div>
-                  </WidgetHeader>
-                  <WidgetRow>
-                    <label htmlFor="title">Task Title
-                      <input 
-                        name="title"
-                        type="text"
-                        placeholder="This is a task title..."
-                        value={title}
-                        onChange={this.handleChange}
-                      />
-                    </label>
+                <label htmlFor="title" className="heading">Task Title
+                  <input 
+                    name="title"
+                    type="text"
+                    placeholder="This is a task title..."
+                    value={title}
+                    onChange={this.handleChange}
+                  />
+                </label>
 
-                    <label htmlFor="title">Task Description
-                      <textarea
-                        name="description"
-                        placeholder="This is a task description..."
-                        value={description}
-                        onChange={this.handleChange}
-                      />
-                    </label>
+                <label htmlFor="title" className="heading">Task Description
+                </label>
 
-                  </WidgetRow>
-                </Widget>
+                <Query query={ALL_USERS_QUERY}>
+                  {({data, error, loading}) => (!error && !loading) ? (
+                    <RichTextEditor 
+                      editorState={this.state.editorState} 
+                      suggestions={data.users.map(user => ({
+                        ...user,
+                        avatar: user.avatar || '/static/userprofile.jfif'
+                      }))}  
+                      onChange={(editorState) => this.setState({ editorState })}
+                    />
+                  ) : <p>Loading...</p>}
+                    
+                </Query>
 
                 {customFields.length > 0 && (
                   <Widget marginTop>
@@ -301,7 +341,7 @@ class CreateTaskForm extends Component {
                         >
                           
                           <div className="flex flex--removable">
-                            <label htmlFor={assetTitleName}>{!i && 'Attachment title'}
+                            <label htmlFor={assetTitleName}  className="heading">{!i && 'Attachment title'}
                               <input 
                                 name={assetTitleName}
                                 type="text"
@@ -313,7 +353,7 @@ class CreateTaskForm extends Component {
                               />
                             </label>
                             
-                            <label htmlFor={assetName}>{!i && 'Attachment URL'}
+                            <label htmlFor={assetName}  className="heading">{!i && 'Attachment URL'}
                               <input 
                                 name={assetName}
                                 type="text"
@@ -325,7 +365,7 @@ class CreateTaskForm extends Component {
                               />
                             </label>
 
-                            <label htmlFor={assetTypeName}>{!i && 'Attachment Type'}
+                            <label htmlFor={assetTypeName}  className="heading">{!i && 'Attachment Type'}
                               <select
                                 name={assetTypeName}
                                 onChange={this.handleChange}
@@ -362,36 +402,15 @@ class CreateTaskForm extends Component {
                 </Widget>
 
               </Col>
-              <Col division='fourths'>
-                <SidebarRow>
-                  <Controls>
-                    <Button>
-                      Cancel
-                    </Button>
-
-                    <Button 
-                      secondary
-                      onClick={() => this.createTask(createTask)}  
-                      disabled={loading}
-                    >
-                      Create Task
-                    </Button>
-                  </Controls>
-                </SidebarRow>
-
+              <Col sidebar>
                 <SidebarRow>
                   <fieldset className="no-margin">
-                    <label htmlFor="due">Task Due</label>
-                    <p>Set priority level or due date</p>
+                    <label htmlFor="due"  className="heading">Task Due</label>
                       <Select 
                         options={[
                           {
-                            value: 'WHENPOSSIBLE',
-                            label: 'When Possible',
-                          },
-                          {
-                            value: 'ASAP',
-                            label: 'ASAP (priority)',
+                            value: '',
+                            label: 'No Due Date',
                           },
                           {
                             value: 'BYDATE',
@@ -404,25 +423,57 @@ class CreateTaskForm extends Component {
                         ]} 
                         onChange={this.handleDueChange}
                         name="due"
-                        placeholder={'When Possible'}
+                        placeholder={'No Due Date'}
                       />
+                  </fieldset>
 
-                      <label htmlFor="date" className="hidden">Date:</label>
-                      {!dateDisabled && (
-                        <DatePicker 
-                          animate={!dateDisabled}
-                          disabled={dateDisabled}
-                          date={dueDate}
-                          setDate={this.setDate}
-                        />
-                      )}
+                  <label htmlFor="date" className="hidden heading">Date:</label>
+                    {!dateDisabled && (
+                      <DatePicker 
+                        animate={!dateDisabled}
+                        disabled={dateDisabled}
+                        date={dueDate}
+                        setDate={this.setDate}
+                      />
+                    )}
+                </SidebarRow>
+
+                <SidebarRow>
+                  <fieldset className="no-margin">
+                    <label htmlFor="due"  className="heading">Priority Level</label>
+                      <Select 
+                        options={[
+                          {
+                            value: 'LOWEST',
+                            label: 'Lowest',
+                          },
+                          {
+                            value: 'LOW',
+                            label: 'Low',
+                          },
+                          {
+                            value: 'MEDIUM',
+                            label: 'Medium',
+                          },
+                          {
+                            value: 'HIGH',
+                            label: 'High',
+                          },
+                          {
+                            value: 'URGENT',
+                            label: 'Urgent',
+                          },
+                        ]} 
+                        onChange={this.handlePriorityChange}
+                        name="priority"
+                        placeholder={'Low'}
+                      />
                   </fieldset>
                 </SidebarRow>
                 
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>
-                    <label htmlFor="user">Assign Task</label>
-                    <p>Assign this task to:</p>
+                    <label htmlFor="user"  className="heading">Assign Task to user</label>
                     <AssignToUser name="user" onChange={this.handleUserChange}/>
                   </SidebarRow>
                 )}
@@ -435,4 +486,4 @@ class CreateTaskForm extends Component {
   }
 }
 
-export default CreateTaskForm
+export default withApollo(CreateTaskForm)

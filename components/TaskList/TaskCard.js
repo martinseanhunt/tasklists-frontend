@@ -22,7 +22,7 @@ import CardFooter from '../styles/card/CardFooter'
 // The Staff member who's assigned to the last comment that we're waiting on assets etc
 
 const dueTypeMap = {
-  ASAP: 'Due ASAP (priority)',
+  ASAP: 'Due ASAP',
   WHENPOSSIBLE: 'Due when possible',
   BYDATE: 'Due by ',
   ONDATE: 'Due on '
@@ -32,7 +32,7 @@ const TaskCard = ({ task, division }) => {
   return (
     <Col key={task.id} division={division} marginBottom>
       <Card
-        onClick={() => Router.pushRoute('task', { id: task.id })}
+        onClick={() => Router.pushRoute('taskWithSlug', { id: task.id, taskListSlug: task.taskList.slug })}
         clickable
       >
         <CardHeader>

@@ -13,7 +13,7 @@ class ErrorHandler extends Component {
   render() {
     return (
       <Query query={ERROR_QUERY}>
-        {({data: { showError }}) => showError && <ErrorNotification><div><p>Oops, something went wrong!</p></div></ErrorNotification>}
+        {({data}) => data && data.showError && <ErrorNotification><div><p>Oops, something went wrong!</p></div></ErrorNotification>}
       </Query>
     )
   }

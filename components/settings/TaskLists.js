@@ -80,7 +80,7 @@ class TaskLists extends Component {
   
               const { taskLists } = data
 
-              return taskLists.length > 0 && taskLists
+              return taskLists && taskLists.length > 0 && taskLists
                 .map(taskList => <TaskListCard taskList={taskList} key={taskList.id}/>)
             }}
           </Query>

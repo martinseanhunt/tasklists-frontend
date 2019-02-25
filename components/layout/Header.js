@@ -41,13 +41,13 @@ const HeaderStyles = styled.header`
   background: #fff;
   border-bottom: 1px solid #eaedf2;
   text-align: left;
-  padding: 0 30px;
+  padding: 0 25px;
   position: fixed;
   width: 100%;
   top:0;
   left: 0;
   height: 70px;
-  z-index: 1010;
+  z-index: 9998;
   display: flex;
   align-items: center;
   justify-content: space-between;

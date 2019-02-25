@@ -11,11 +11,24 @@ const Button = styled.button`
   background-image: linear-gradient(to top, #f6f7f9, #ffffff);
   padding: 0 15px;
 
+  &:hover {
+    background-image: linear-gradient(to bottom, #f6f7f9, #ffffff);
+  }
+
+  svg {
+    font-size: 14px;
+    margin-right: 7px;
+  }
+
   ${props => props.primary && `
     box-shadow: 0 1px 1px 0 rgba(22, 29, 37, 0.1), inset 0 2px 0 0 rgba(255, 255, 255, 0.06);
     border: solid 1px #1461d2;
     background-image: linear-gradient(to top, #1665d8, #1f6fe5);
     color: #fff;
+
+    &:hover {
+      background-image: linear-gradient(to bottom, #1665d8, #1f6fe5);
+    }
   `}
 
   ${props => props.cancel && `
@@ -24,6 +37,10 @@ const Button = styled.button`
     background-image: linear-gradient(to top, #e6492d, #D8442A);
     color: #fff;
     margin-left: 10px;
+
+    &:hover {
+      background-image: linear-gradient(to bottom, #e6492d, #D8442A);
+    }
   `}
 
   ${props => props.secondary && `
@@ -31,6 +48,10 @@ const Button = styled.button`
     border: solid 1px #2d9c3c;
     background-image: linear-gradient(to top, #34aa44, #38b249);
     color: #fff;
+
+    &:hover {
+      background-image: linear-gradient(to bottom, #34aa44, #38b249);
+    }
   `}
 
   ${props => props.fullWidth && `

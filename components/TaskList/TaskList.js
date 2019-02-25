@@ -1,106 +1,156 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { Component } from 'react'
+import { Query } from 'react-apollo'
+import gql from 'graphql-tag'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Select from 'react-select'
+
+import { Router } from '../../routes'
+import { TASKCARD_FRAGMENT } from '../Dashboard/Dashboard'
 
 import Col from '../styles/grid/Col'
-import Row from '../styles/grid/Row'
-import TaskCard from './TaskCard'
-import CreateTaskCard from './CreateTaskCard'
+import Button from '../styles/Button'
+import ListView from '../ListView/ListView'
+import SectionHeader from '../layout/SectionHeader/SectionHeader'
 
 // TODO Ordering and filtering!
 
 // TODO SEARCH
 
-// TODO move division logic elsewhere - helper function
-
-// TODO ARCHIVE COMPLETED TASKS AFTER x TIME ?
-// TODO ARCHIVE COMPLETED TASKS manuall ? both individually and archive all completed
-
 // TODO ARCHIVE CLOSED TASKS IMMEDIATELY WHEN CLOSED ?
 
 // TODO PAGINATION
 
-// TODO tooltip for status bar
+// TODO tooltips
 
-const TaskList = ({ taskList, openTasks, completedTasks }) => {
-  let division = 'halves'
-  if((openTasks.length + 1) > 2 ) 
-    division = (openTasks.length) % 3 === 0
-      ? 'thirds'
-      : 'fourths'
+// TODO PRIORITY: Toggle between open and completed and cancelled tasks
 
-  return (
-    <div>
-      <Col>
-        <h2>{taskList.name}</h2>
-        <p>{taskList.description}</p>
+// TODO handle incorrect or missing slug
 
-        {/*  SEARCH HERE */}
-      </Col>
 
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="list"/>Open Tasks</h2>
-        </SectionHeader>
-      </Col>
+const TASKLIST_QUERY = gql`
+  query TASKLIST_QUERY(
+    $slug: String!, 
+    $excludeStatus: [TaskStatus],
+    $filterByStatus: [TaskStatus],
+    $orderBy: String
+  ) {
+    taskList(slug: $slug) {
+      name
+      id
+      slug
+      description
+      color
+    }
 
-      <Row marginBottom>
-        <>
-        <CreateTaskCard division={division} taskList={taskList} />
-        {openTasks && openTasks.map(task => (
-          <TaskCard task={task} division={division} key={task.id}/>
-        ))}
-        </>
-      </Row>
+    tasks(
+      taskListSlug: $slug
+      excludeStatus: $excludeStatus
+      filterByStatus: $filterByStatus
+      orderBy: $orderBy
+    ) {
+      ${TASKCARD_FRAGMENT}
+    }
+  }
+`
 
-      <Col>
-        <SectionHeader>
-          <h2><FontAwesomeIcon icon="check-square"/>Completed Tasks</h2>
-        </SectionHeader>
-      </Col>
-      <Row>
-        {completedTasks && completedTasks.map(task => (
-          <TaskCard task={task} division={division} key={task.id}/>
-        ))}
-      </Row>
+class TaskList extends Component {
+  state = {
+    viewing: {
+      value: 'open',
+      label: 'Viewing Open Tasks'
+    },
+    sortBy: null
+  }
 
-    </div>
-  )
-}
+  getFilterVariables() {
+    if(this.state.viewing.value === 'completed') return {
+      filterByStatus: ['COMPLETED']
+    }
 
-const SectionHeader = styled.div`
-  padding: 30px 0;
-  position: relative;
-  
-  h2 {
-    color: #3e3f42;
-    font-size: 1.4rem;
-    font-weight: 500;
-    margin: 0;
-    background: #fbfbfd;
-    z-index: 999;
-    position: relative;
-    display: inline;
-    padding-right: 20px;
+    if(this.state.viewing.value === 'cancelled') return {
+      filterByStatus: ['CLOSED', 'CANCELLED']
+    }
 
-    svg {
-      font-size: 1.4rem;
-      margin-right: 10px;
-      color: #9ea0a5;
+    return {
+      excludeStatus: ['CANCELLED', 'CLOSED', 'COMPLETED']
     }
   }
 
-  &:after {
-    position: absolute;
-    width: 100%;
-    height: 1px;
-    display: block;
-    background: #eaedf3;
-    content: "";
-    top: 50%;
-    left: 0;
+  handleViewingChange = (e) => {
+    e.label = 'Viewing ' + e.label
+    this.setState({ viewing: e })
   }
 
-`
+  updateSortBy = (sortBy) => this.setState({ sortBy: sortBy })
+
+  render() {
+    const { slug } = this.props
+
+    return (
+      <Query 
+        query={TASKLIST_QUERY}
+        variables={{
+          slug,
+          ...this.getFilterVariables(),
+          orderBy: this.state.sortBy,
+        }}
+      >
+        {({data, error, loading}) => {
+          if(error) return <p>Oops, something went wrong loading the list</p>
+          if(loading) return <p>Loading...</p>
+
+          const { taskList, tasks } = data
+
+          return (
+            <>
+              <SectionHeader taskList={taskList}>
+                <label htmlFor='viewByStatus'> 
+                  <Select 
+                    value={this.state.viewing}
+                    options={[
+                      {
+                        value: 'open',
+                        label: 'Open Tasks',
+                      },
+                      {
+                        value: 'completed',
+                        label: 'Completed Tasks',
+                      },
+                      {
+                        value: 'cancelled',
+                        label: 'Cancelled Tasks',
+                      },
+                    ]} 
+                    onChange={this.handleViewingChange}
+                    name='viewing'
+                    styles={{ cursor: 'pointer' }}
+                    placeholder='Viewing Open Tasks'
+                  />
+                </label>
+                <Button 
+                  primary 
+                  onClick={() => Router.pushRoute('createTask', { taskListSlug: taskList.slug })}
+                >
+                  <FontAwesomeIcon icon="plus" /> 
+                  New Task
+                </Button>
+              </SectionHeader>
+            
+              <Col>
+                <ListView 
+                  listItems={tasks} 
+                  sortBy={this.state.sortBy} 
+                  updateSortBy={this.updateSortBy} 
+                  title={this.state.viewing.value + ' Tasks'}/>
+              </Col>
+            </>
+          )
+
+        }}
+      </Query>
+    )
+  }
+}
 
 export default TaskList
+export { TASKLIST_QUERY }
