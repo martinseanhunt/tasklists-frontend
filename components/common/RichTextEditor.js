@@ -5,11 +5,8 @@ import createMentionPlugin, {
   defaultSuggestionsFilter
 } from 'draft-js-mention-plugin'
 import createToolbarPlugin from 'draft-js-static-toolbar-plugin'
+import createLinkifyPlugin from 'draft-js-linkify-plugin'
 import styled from 'styled-components'
-
-// TODO add acnchors and auto linkify
-// https://www.draft-js-plugins.com/plugin/anchor
-// https://www.draft-js-plugins.com/plugin/linkify
 
 // TODO implement more buttons https://www.draft-js-plugins.com/plugin/static-toolbar
 
@@ -24,9 +21,11 @@ import {
 
 import 'draft-js-mention-plugin/lib/plugin.css'
 import 'draft-js-static-toolbar-plugin/lib/plugin.css'
+import 'draft-js-linkify-plugin/lib/plugin.css'
 
 const toolbarPlugin = createToolbarPlugin()
 const { Toolbar } = toolbarPlugin
+const linkifyPlugin = createLinkifyPlugin()
 
 class RichTextEditor extends React.Component {
   constructor(props) {
@@ -81,7 +80,7 @@ class RichTextEditor extends React.Component {
  
   render() {
     const { MentionSuggestions } = this.mentionPlugin
-    const plugins = [this.mentionPlugin, toolbarPlugin]
+    const plugins = [this.mentionPlugin, toolbarPlugin, linkifyPlugin]
 
     return (
       <EditorContainer>

@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import Confetti from 'react-dom-confetti'
 import {stateToHTML} from 'draft-js-export-html'
 import { convertFromRaw } from 'draft-js'
+import linkifyHtml from 'linkifyjs/html'
 
 import { Router } from '../routes'
 
@@ -290,11 +291,11 @@ class TaskPage extends Component {
                             <Description>
                               {task.richText 
                                 ? <div dangerouslySetInnerHTML={{ 
-                                    __html: stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
+                                    __html: linkifyHtml(stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
                                       entityStyleFn: (entity) => {
-                                        const entityType = entity.get('type').toLowerCase();
+                                        const entityType = entity.get('type').toLowerCase()
                                         if (entityType === 'mention') {
-                                          const data = entity.getData();
+                                          const data = entity.getData()
                                           return {
                                             element: 'span',
                                             attributes: {
@@ -302,12 +303,12 @@ class TaskPage extends Component {
                                             },
                                             style: {
                                             },
-                                          };
+                                          }
                                         }
                                       }
-                                    })
+                                    }))
                                   }}/>
-                                : <p>{task.description}</p>}
+                                : <p>{linkifyHtml(task.description)}</p>}
                             </Description>
                           </WidgetRow>
 
