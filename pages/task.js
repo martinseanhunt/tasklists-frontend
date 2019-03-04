@@ -23,6 +23,7 @@ import WidgetHeader from '../components/styles/widget/WidgetHeader'
 import WidgetFooter from '../components/styles/widget/WidgetFooter'
 import WidgetRow from '../components/styles/widget/WidgetRow'
 import SubHeader from '../components/layout/SubHeader'
+import SectionHeader from '../components/layout/SectionHeader/SectionHeader'
 
 import User from '../components/providers/User'
 import Avatar from '../components/common/Avatar'
@@ -196,123 +197,122 @@ class TaskPage extends Component {
                 if(!task) return <p>Loading...</p>
 
                 return (
-                  <>
-                  <SubHeader>
-                    <BreadCrumb>
-                      <Link route='tasklist' params={{ slug: task.taskList.slug }}><a>« Task List: {task.taskList.name}</a></Link>
-                    </BreadCrumb>
-
-                    {/* TODO refactor these two operations to use same mutation nad move in to own compoennt  */}
-
-                    {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
-                      <Mutation
-                        mutation={UNSUBSCRIBE_FROM_TASK}
-                        variables={{ task: task.id }}
-                        onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
-                      >
-                        {(unsubscribeFromTask, {data, error, loading}) => {
-                          if(error) console.log(error)
-                          
-                          return (
-                            <Button
-                              onClick={unsubscribeFromTask}
-                              disabled={loading}
-                            >
-                              Unsubscribe from task
-                            </Button>
-                          )
-                        }}
-                      </Mutation>
-                    ) : (
-                      <Mutation
-                        mutation={SUBSCRIBE_TO_TASK}
-                        variables={{ task: task.id }}
-                        onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
-                      >
-                        {(subscribeToTask, {data, error, loading}) => {
-                          if(error) console.log(error)
-                          
-                          return (
-                            <Button
-                              onClick={subscribeToTask}
-                              disabled={loading}
-                            >
-                              Subscribe to Task
-                            </Button>
-                          )
-                        }}
-                      </Mutation>
-                    )}
-                  </SubHeader>
-
-                  <Container>
+                  <Container noPadd>
+                    <SectionHeader 
+                      taskList={task.taskList}
+                      title={task.title}
+                      subTitle={`${task.createdBy.name} created this task on ${moment(task.createdAt).format('MMM Do YYYY')}`}
+                    >
+                      <Controls>
+                        <Button>
+                          Edit Task
+                        </Button>
+                        {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
+                          <Mutation
+                            mutation={UNSUBSCRIBE_FROM_TASK}
+                            variables={{ task: task.id }}
+                            onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                          >
+                            {(unsubscribeFromTask, {data, error, loading}) => {
+                              if(error) console.log(error)
+                              
+                              return (
+                                <Button
+                                  onClick={unsubscribeFromTask}
+                                  disabled={loading}
+                                >
+                                  Unsubscribe from task
+                                </Button>
+                              )
+                            }}
+                          </Mutation>
+                        ) : (
+                          <Mutation
+                            mutation={SUBSCRIBE_TO_TASK}
+                            variables={{ task: task.id }}
+                            onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                          >
+                            {(subscribeToTask, {data, error, loading}) => {
+                              if(error) console.log(error)
+                              
+                              return (
+                                <Button
+                                  onClick={subscribeToTask}
+                                  disabled={loading}
+                                >
+                                  Subscribe to Task
+                                </Button>
+                              )
+                            }}
+                          </Mutation>
+                        )}
+                      </Controls>
+                    </SectionHeader>
+                    
                     <Row>
                       <Col>
-                        <Widget>
-                          <WidgetHeader noFlex notFixed>
-                            <h1>{task.title}</h1>                            
-                            <p> 
-                              {task.createdBy.name} created this task on {moment(task.createdAt).format('MMM Do YYYY')}
-                            </p>
-                            
-                          </WidgetHeader>
-                          
-                          <TaskMeta>
-                            <div>
-                              <span className="label">Status: </span>  <span>{task.status}</span>
-                            </div>
+                        <Heading noMargin>Description</Heading>
 
-                            <div>
-                              <span className="label">Due: </span>  <span>{task.due} {task.dueDate && moment(task.dueDate).format('MMM Do YYYY')}</span>
-                            </div>
-
-                            <div>
-                              <span className="label">Assigned to: </span>  
-                              <span>
-                                {task.assignedTo 
-                                  ? <Avatar user={task.assignedTo}/>
-                                  : 'None'
-                                }
-                                
-                              </span>
-                            </div>
-
-                            {task.customFields.length > 0 && (
-                              task.customFields.map(cf => (
-                                <div key={cf.id}>
-                                  <span className="label">{cf.fieldName}:</span> 
-                                  <span>{cf.fieldValue}</span>
-                                </div>
-                              ))
-                          )}
-                          </TaskMeta>
-
-                          <WidgetRow>
-                            <Description>
-                              {task.richText 
-                                ? <div dangerouslySetInnerHTML={{ 
-                                    __html: linkifyHtml(stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
-                                      entityStyleFn: (entity) => {
-                                        const entityType = entity.get('type').toLowerCase()
-                                        if (entityType === 'mention') {
-                                          const data = entity.getData()
-                                          return {
-                                            element: 'span',
-                                            attributes: {
-                                              className: 'mention',
-                                            },
-                                            style: {
-                                            },
-                                          }
+                        <Description>
+                          <Data>
+                            {task.richText 
+                              ? <div dangerouslySetInnerHTML={{ 
+                                  __html: linkifyHtml(stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
+                                    entityStyleFn: (entity) => {
+                                      const entityType = entity.get('type').toLowerCase()
+                                      if (entityType === 'mention') {
+                                        const data = entity.getData()
+                                        return {
+                                          element: 'span',
+                                          attributes: {
+                                            className: 'mention',
+                                          },
+                                          style: {
+                                          },
                                         }
                                       }
-                                    }))
-                                  }}/>
-                                : <p>{linkifyHtml(task.description)}</p>}
-                            </Description>
-                          </WidgetRow>
+                                    }
+                                  }))
+                                }}/>
+                              : <p>{linkifyHtml(task.description)}</p>}
+                          </Data>
+                        </Description>
 
-                          {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
+                        <Heading>Discussion</Heading>
+                        <Comments 
+                          task={task}
+                          user={userData.me}
+                        />
+                      </Col>
+                      <Col sidebar>
+                      
+                        <SidebarRow>
+                          <h4>Assigned</h4>
+                          <p>This task is assigned to:</p>
+                          <strong>{task.assignedTo ? (
+                            <>
+                              <Avatar user={task.assignedTo} />
+                              {task.assignedTo.name}
+                            </>
+                          ) : <p>None</p>}</strong>
+                        </SidebarRow>
+
+                        <SidebarRow>
+                          <h4>Attachments</h4>
+                          <p>Attachments for the task:</p>
+                          {task.assets.length > 0 && (
+                            task.assets.map(a => (
+                              <li key={a.id}>
+                                <a href={a.assetUrl} target="__blank">{a.title} ({a.assetType})</a>
+                              </li>
+                            ))
+                          )}
+                        </SidebarRow>
+
+
+                        <SidebarRow>
+
+                        {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
                           || task.createdBy.id === userData.me.id
                           || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
                           && (
@@ -337,9 +337,7 @@ class TaskPage extends Component {
                               return (
                                   <WidgetFooter>
                                     <div className="controls">
-                                      <Button>
-                                        Edit
-                                      </Button>
+                                      
                                       {!['COMPLETED', 'CLOSED'].includes(task.status) && (
                                         <Button cancel
                                           onClick={() => updateTaskStatus({ variables: {
@@ -377,43 +375,12 @@ class TaskPage extends Component {
                             </Mutation>
                           )
                         }
-                        </Widget>
-
-                        <Comments 
-                          task={task}
-                          user={userData.me}
-                        />
-                      </Col>
-                      <Col division='fourths'>
-                      
-                        <SidebarRow>
-                          <h4>Assigned</h4>
-                          <p>This task is assigned to:</p>
-                          <strong>{task.assignedTo ? (
-                            <>
-                              <Avatar user={task.assignedTo} />
-                              {task.assignedTo.name}
-                            </>
-                          ) : <p>None</p>}</strong>
-                        </SidebarRow>
-
-                        <SidebarRow>
-                          <h4>Attachments</h4>
-                          <p>Attachments for the task:</p>
-                          {task.assets.length > 0 && (
-                            task.assets.map(a => (
-                              <li key={a.id}>
-                                <a href={a.assetUrl} target="__blank">{a.title} ({a.assetType})</a>
-                              </li>
-                            ))
-                          )}
-                        </SidebarRow>
+                      </SidebarRow>
 
                       
                       </Col>
                     </Row>
                   </Container>
-                  </>
                 )
               }}
             </Query>
@@ -458,7 +425,34 @@ const TaskMeta = styled(WidgetRow)`
   }
 `
 
+const Heading = styled.span`
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  color: #9ea0a5;
+  font-weight: 500;
+  display: block;
+  margin-top: ${({ noMargin }) => noMargin ? '0' : '20px'};
+  padding-bottom: 10px;
+`
+
+const Data = styled.div`
+  border: 1px solid #e2e5ed;
+  padding: 16px;
+  border-radius: 4px;
+  background: #fff;
+  margin-bottom: 20px;
+`
+
 const Description = styled.div`
+  margin-bottom: 30px;
+  p:first-of-type {
+    margin-top: 0;
+  }
+
+  p:last-of-type {
+    margin-bottom: 0;
+  }
+
   span.mention {
     background: rgba(103,88,243,0.08);
     

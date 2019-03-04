@@ -18,7 +18,7 @@ import {
   OrderedListButton,
   BlockquoteButton,
 } from 'draft-js-buttons';
-
+  
 import 'draft-js-mention-plugin/lib/plugin.css'
 import 'draft-js-static-toolbar-plugin/lib/plugin.css'
 import 'draft-js-linkify-plugin/lib/plugin.css'
@@ -33,6 +33,8 @@ class RichTextEditor extends React.Component {
 
     this.mentionPlugin = createMentionPlugin()
   }
+
+  state = { beenFocused: false }
   
   handleKeyCommand = (command) => {
     const newState = RichUtils.handleKeyCommand(this.props.editorState, command)
@@ -74,7 +76,9 @@ class RichTextEditor extends React.Component {
 
   */
 
-  focus = () => {
+  focus = (e) => {
+    this.setState({ beenFocused: true })
+    this.props.beenFocused && this.props.beenFocused()
     this.editor.focus()
   }
  
@@ -82,22 +86,31 @@ class RichTextEditor extends React.Component {
     const { MentionSuggestions } = this.mentionPlugin
     const plugins = [this.mentionPlugin, toolbarPlugin, linkifyPlugin]
 
+    const showToolbar = ((this.props.hideToolbarBeforeFocus && this.state.beenFocused) || !this.props.hideToolbarBeforeFocus)
+
     return (
-      <EditorContainer>
+      <EditorContainer noPaddNoBorder={this.props.noPaddNoBorder} showToolbar={showToolbar}
+      >
         <div onClick={this.focus}>
-          <Toolbar>
-            {
-              (externalProps) => (
-                <div>
-                  <BoldButton {...externalProps} />
-                  <ItalicButton {...externalProps} />
-                  <UnderlineButton {...externalProps} />
-                  <UnorderedListButton {...externalProps} />
-                  <OrderedListButton {...externalProps} />
-                </div>
-              )
-            }
-          </Toolbar>
+          <div style={{
+            visibility: showToolbar ? 'visible' : 'hidden',
+            height: showToolbar ? 'auto' : '0'
+          }}>
+            <Toolbar>
+              {
+                (externalProps) => (
+                  <div>
+                    <BoldButton {...externalProps} />
+                    <ItalicButton {...externalProps} />
+                    <UnderlineButton {...externalProps} />
+                    <UnorderedListButton {...externalProps} />
+                    <OrderedListButton {...externalProps} />
+                  </div>
+                )
+              }
+            </Toolbar>
+          </div>
+          
           <Editor
             editorState={this.props.editorState}
             handleKeyCommand={this.handleKeyCommand}
@@ -106,6 +119,7 @@ class RichTextEditor extends React.Component {
             ref={element => {
               this.editor = element;
             }}
+            placeholder={this.props.placeholder}
           />
           <MentionSuggestions
             onSearchChange={this.onSearchChange}
@@ -120,12 +134,15 @@ class RichTextEditor extends React.Component {
 }
 
 const EditorContainer = styled.div`
-  border: 1px solid #e2e5ed;
-  padding: 16px;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: inset 0 1px 2px 0 rgba(102,113,123,0.1);
-  margin-top: 10px;
+
+  ${({ noPaddNoBorder }) => !noPaddNoBorder && `
+    border: 1px solid #e2e5ed;
+    padding: 16px;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: inset 0 1px 2px 0 rgba(102,113,123,0.1);
+    margin-top: 10px;
+  `}
 
   .draftJsToolbar__toolbar__dNtBH {
     background: #fbfbfb;
@@ -133,14 +150,21 @@ const EditorContainer = styled.div`
   }
 
   .DraftEditor-root {
-    margin-top: 16px;
+    margin-top: ${({ showToolbar }) => showToolbar ? '16px' : '10px'};
     cursor: text;
-    margin-bottom: 2em;
+    margin-bottom: ${({ showToolbar }) => showToolbar ? '2em' : '10px'};
     max-width: 100%;
+    max-height: 140px;
   }
 
+  .public-DraftEditorPlaceholder-root{ height: 0; overflow: visible; color: #6D6E70 }
+
+  .public-DraftEditorPlaceholder-hasFocus { display: none; }
+
   .public-DraftEditor-content {
-    min-height: 140px;
+    ${({ showToolbar }) => showToolbar && `
+      min-height: 140px;
+    `}
   }
 
   .draftJsToolbar__buttonWrapper__1Dmqh:nth-of-type(3) svg{

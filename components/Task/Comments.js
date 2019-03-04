@@ -5,6 +5,7 @@ import moment from 'moment'
 import styled from 'styled-components'
 import Textarea from 'react-textarea-autosize'
 import { MentionsInput, Mention } from 'react-mentions'
+import { EditorState, convertToRaw } from 'draft-js'
 
 import { TASK_QUERY } from '../../pages/task'
 import { ALL_USERS_QUERY } from './AssignToUser'
@@ -17,6 +18,13 @@ import Button from '../styles/Button'
 
 import AssignToUser from './AssignToUser'
 import Avatar from '../common/Avatar'
+
+// Allows RTE to access window - doesn' need to be server rendered
+import dynamic from 'next/dynamic'
+const RichTextEditor = dynamic(() => import('../common/RichTextEditor'), {
+  ssr: false
+})
+
 
 // TODO create fragment for getting comment 
 // info so don't always have to update here when updating in task
@@ -52,6 +60,7 @@ const CREATE_COMMENT_MUTATION = gql`
 class Comments extends Component {
   state = {
     value: '',
+    editorState: EditorState.createEmpty()
   }
 
   onCreateComment = (cache, { data }) => {
@@ -102,56 +111,41 @@ class Comments extends Component {
   render() {
     const { task, user } = this.props
     return (
-      <Widget marginTop>
-        <WidgetHeader>
-          <h3>Discussion</h3>
+      <>
 
-          {/* TODO user avatars who are invlolved */}
-        </WidgetHeader>
-        
         {task.comments.length > 0 && (
-          <WidgetRow>
-            {task.comments.map(comment => (
-              <Comment key={comment.id}>
-                <Avatar user={comment.createdBy} comment xs/>
-                <span className="author">{comment.createdBy.name}</span>
-                <span className="date"> {moment(comment.createdAt).fromNow()}</span>
-                <div className="comment" dangerouslySetInnerHTML={{ __html: comment.comment }} />
-              </Comment>
-            ))}
-          </WidgetRow>
+          task.comments.map((comment, i) => (
+            <Comment key={comment.id} last={i+1 === task.comments.length }>
+              <CommentHeader>
+                <Avatar user={comment.createdBy} comment/>
+                <div className="meta">
+                  <span className="author">{comment.createdBy.name}</span>
+                  <span className="date"> {moment(comment.createdAt).fromNow()}</span>
+                </div>
+              </CommentHeader>
+              <div className="comment" dangerouslySetInnerHTML={{ __html: comment.comment }} />
+            </Comment>
+          ))
         )}
 
-        <WidgetFooter isForm>
-          <InputContainer>
-            <Avatar user={user}/>
-            <Query query={ALL_USERS_QUERY}>
-              {(usersPayload) => {
-                if(usersPayload.error) console.error(usersPayload.error)
-
-                // TODO PRIORITY set custom markup to just be @[FULL NAME] 
-                // then set callback function when person is added or removed. 
-
-                // TODO do this differently so I can clean out any html on server side
-
-                return (
-                  <MentionsInput
-                    value={this.state.value}
-                    onChange={e => this.setState({ value: e.target.value })}
-                    placeholder='Write a comment...'
-                    className='mentions-input'
-                  >
-                    <Mention
-                      trigger="@"
-                      data={usersPayload.data.users.map(u => ({ id: u.id, display: u.name }))}
-                    />
-                  </MentionsInput>
-                )
-              }}
-            </Query>
-            
-          </InputContainer>
-          {this.state.value.length > 0 && (
+        <AddComment>
+          <Query query={ALL_USERS_QUERY}>
+            {({data, error, loading}) => (!error && !loading) ? (  
+              <RichTextEditor 
+                editorState={this.state.editorState} 
+                suggestions={data.users.map(user => ({
+                  ...user,
+                  avatar: user.avatar || '/static/userprofile.jfif'
+                }))}  
+                onChange={(editorState) => this.setState({ editorState, touched: true })}
+                placeholder='Write a comment...'
+                noPaddNoBorder
+                hideToolbarBeforeFocus
+                beenFocused={() => this.setState({ beenFocused: true })}
+              /> ) : 'Loading...'}
+          </Query>
+          
+          {this.state.beenFocused && (
             <Controls>
               <div className="flex">
                 
@@ -177,15 +171,15 @@ class Comments extends Component {
               
             </Controls>
           )}
-        </WidgetFooter>
-      </Widget>
+        </AddComment>
+      </>
     )
   }
 }
 
 const InputContainer = styled.div`
   position: relative;
-  padding: 5px 10px 5px 40px;
+  padding: 20px;
   
   .avatar {
     position: absolute;
@@ -241,10 +235,15 @@ const SelectUser = styled.div`
 `
 
 const Comment = styled.div`
-  border-bottom: 1px solid #EBECEE;
-  padding: 30px 0;
-  margin-left: 35px;
-  position: relative;
+  border: 1px solid #e2e5ed;
+  padding: 16px;
+  border-radius: 4px;
+  background: #fff;
+  margin-bottom: ${({last}) => last ? '20px' : '15px'};
+
+  .avatar {
+    position: static;
+  }
 
   p {
     margin: 0;
@@ -259,8 +258,10 @@ const Comment = styled.div`
   }
 
   .comment {
-    padding-top: 8px;
+    padding-top: 20px;
+    margin-top: 20px;
     color: #6D6E70;
+    border-top: 1px solid #e2e5ed;
 
     .mention {
       color: #1665d8;
@@ -270,11 +271,31 @@ const Comment = styled.div`
     }
   }
 
+  .meta {
+    display: inline-block;
+    margin-left: 5px;
+  }
+
   .date {
     color: #9EA0A5;
     font-size: 1.2rem;
-    padding-left: 5px;
+    display: block;
   }
+`
+
+const CommentHeader = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+`
+
+const AddComment = styled.div`
+  border: 1px solid #e2e5ed;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: inset 0 1px 2px 0 rgba(102, 113, 123, 0.1);
+  padding: 16px;
+  position: relative; 
 `
 
 export default Comments
