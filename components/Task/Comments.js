@@ -5,7 +5,9 @@ import moment from 'moment'
 import styled from 'styled-components'
 import Textarea from 'react-textarea-autosize'
 import { MentionsInput, Mention } from 'react-mentions'
-import { EditorState, convertToRaw } from 'draft-js'
+import { EditorState, convertToRaw, convertFromRaw } from 'draft-js'
+import linkifyHtml from 'linkifyjs/html'
+import { stateToHTML } from 'draft-js-export-html'
 
 import { TASK_QUERY } from '../../pages/task'
 import { ALL_USERS_QUERY } from './AssignToUser'
@@ -30,15 +32,16 @@ const RichTextEditor = dynamic(() => import('../common/RichTextEditor'), {
 // info so don't always have to update here when updating in task
 
 const CREATE_COMMENT_MUTATION = gql`
-  mutation CREATE_COMMENT_MUTATION($comment: String!, $task: ID!, $notify: [ID]) {
+  mutation CREATE_COMMENT_MUTATION($comment: String!, $task: ID!, $richText: String) {
     createComment(
       comment: $comment
       task: $task
-      notify: $notify
+      richText: $richText
     ) {
       id
       comment
       createdAt
+      richText
       createdBy {
         id
         name
@@ -59,7 +62,6 @@ const CREATE_COMMENT_MUTATION = gql`
 
 class Comments extends Component {
   state = {
-    value: '',
     editorState: EditorState.createEmpty()
   }
 
@@ -85,24 +87,15 @@ class Comments extends Component {
   }
 
   postComment = (createComment, task) => {
-    const { value } = this.state
+    const { editorState } = this.state
 
-    // Get all user id's of people mentioned and put in notify array
-    const regexp = /\((.*?)\)/g
-    
-    let notify = []
-    let match = regexp.exec(value)
-
-    while (match != null) {
-      notify = [...notify, match[1]]
-      match = regexp.exec(value)
-    }
+    const ContentState = editorState.getCurrentContent()
 
     createComment({ 
       variables: {
-        comment: value,
+        comment: ContentState.getPlainText(),
+        richText: JSON.stringify(convertToRaw(ContentState)),
         task,
-        notify
       }
     })
 
@@ -112,20 +105,41 @@ class Comments extends Component {
     const { task, user } = this.props
     return (
       <>
-
         {task.comments.length > 0 && (
-          task.comments.map((comment, i) => (
-            <Comment key={comment.id} last={i+1 === task.comments.length }>
-              <CommentHeader>
-                <Avatar user={comment.createdBy} comment/>
-                <div className="meta">
-                  <span className="author">{comment.createdBy.name}</span>
-                  <span className="date"> {moment(comment.createdAt).fromNow()}</span>
-                </div>
-              </CommentHeader>
-              <div className="comment" dangerouslySetInnerHTML={{ __html: comment.comment }} />
-            </Comment>
-          ))
+          task.comments.map((comment, i) => {
+            const commentToRender = comment.richText 
+              ? linkifyHtml(stateToHTML(convertFromRaw(JSON.parse(comment.richText)), {
+                  entityStyleFn: (entity) => {
+                    const entityType = entity.get('type').toLowerCase()
+                    if (entityType === 'mention') {
+                      const data = entity.getData()
+                      return {
+                        element: 'span',
+                        attributes: {
+                          className: 'mention',
+                        },
+                        style: {
+                        },
+                      }
+                    }
+                  }
+                }))
+              : linkifyHtml(comment.comment)
+            
+            return (
+              <Comment key={comment.id} last={i+1 === task.comments.length }>
+                <CommentHeader>
+                  <Avatar user={comment.createdBy} comment/>
+                  <div className="meta">
+                    <span className="author">{comment.createdBy.name}</span>
+                    <span className="date"> {moment(comment.createdAt).fromNow()}</span>
+                  </div>
+                </CommentHeader>
+
+                <div className="comment" dangerouslySetInnerHTML={{ __html: commentToRender }} />
+              </Comment>
+            )
+          })
         )}
 
         <AddComment>

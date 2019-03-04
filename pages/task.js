@@ -93,6 +93,7 @@ const TASK_QUERY = gql`
         id
         comment
         createdAt
+        richText
         assets {
           id
         }
