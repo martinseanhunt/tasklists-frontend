@@ -83,7 +83,7 @@ class Comments extends Component {
       }}
     })
 
-    this.setState({ value: '' })
+    this.setState({ editorState: EditorState.createEmpty() })
   }
 
   postComment = (createComment, task) => {

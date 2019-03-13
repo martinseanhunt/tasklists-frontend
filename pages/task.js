@@ -252,10 +252,17 @@ class TaskPage extends Component {
                     
                     <Row>
                       <Col>
-                        <Heading noMargin>Description</Heading>
+                        <Heading noMargin>Task Details</Heading>
 
                         <Description>
                           <Data>
+                            <TaskDetailHeader>
+                              <Avatar user={task.createdBy} />
+                              <div>
+                                <span className="author">{task.createdBy.name}</span>
+                                <span className="date">Created {moment(task.createdAt).fromNow()}</span>
+                              </div>
+                            </TaskDetailHeader>
                             {task.richText 
                               ? <div dangerouslySetInnerHTML={{ 
                                   __html: linkifyHtml(stateToHTML(convertFromRaw(JSON.parse(task.richText)), {
@@ -465,4 +472,23 @@ const Description = styled.div`
     }
   }
   
+`
+
+const TaskDetailHeader = styled.div`
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e5ed;
+
+  .author { 
+    font-weight: 500;
+    display: block;
+  }
+
+  .date {
+    color: #9EA0A5;
+    font-size: 1.2rem;
+    display: block;
+  }
 `
