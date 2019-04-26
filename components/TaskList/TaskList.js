@@ -12,11 +12,7 @@ import Button from '../styles/Button'
 import ListView from '../ListView/ListView'
 import SectionHeader from '../layout/SectionHeader/SectionHeader'
 
-// TODO Ordering and filtering!
-
 // TODO SEARCH
-
-// TODO ARCHIVE CLOSED TASKS IMMEDIATELY WHEN CLOSED ?
 
 // TODO PAGINATION
 

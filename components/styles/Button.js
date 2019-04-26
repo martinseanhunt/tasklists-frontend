@@ -36,7 +36,6 @@ const Button = styled.button`
     border: solid 1px #e6492d;
     background-image: linear-gradient(to top, #e6492d, #D8442A);
     color: #fff;
-    margin-left: 10px;
 
     &:hover {
       background-image: linear-gradient(to bottom, #e6492d, #D8442A);
@@ -52,6 +51,10 @@ const Button = styled.button`
     &:hover {
       background-image: linear-gradient(to bottom, #34aa44, #38b249);
     }
+  `}
+
+  ${props => props.marginRight && `
+    margin-right: ${props.marginRight}
   `}
 
   ${props => props.fullWidth && `

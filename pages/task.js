@@ -9,6 +9,7 @@ import Confetti from 'react-dom-confetti'
 import {stateToHTML} from 'draft-js-export-html'
 import { convertFromRaw } from 'draft-js'
 import linkifyHtml from 'linkifyjs/html'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { Router } from '../routes'
 
@@ -170,7 +171,16 @@ const UNSUBSCRIBE_FROM_TASK = gql`
 
 class TaskPage extends Component { 
   state = {
-    clearCacheOnUnmount: false
+    clearCacheOnUnmount: false,
+    status: null
+  }
+
+  handleStatusChange = (status, updateTaskStatus, id) => {
+    this.setState({ status })
+    updateTaskStatus({ variables: {
+      id,
+      status
+    }})
   }
 
   async componentWillUnmount() {
@@ -181,6 +191,7 @@ class TaskPage extends Component {
   
   render() { 
     const { query } = this.props
+    
 
     return (
       <User>
@@ -204,29 +215,35 @@ class TaskPage extends Component {
                       title={task.title}
                       subTitle={`${task.createdBy.name} created this task on ${moment(task.createdAt).format('MMM Do YYYY')}`}
                     >
-                      <Controls>
-                        <Button>
-                          Edit Task
-                        </Button>
-                        {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
-                          <Mutation
-                            mutation={UNSUBSCRIBE_FROM_TASK}
-                            variables={{ task: task.id }}
-                            onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
-                          >
-                            {(unsubscribeFromTask, {data, error, loading}) => {
-                              if(error) console.log(error)
-                              
-                              return (
-                                <Button
-                                  onClick={unsubscribeFromTask}
-                                  disabled={loading}
-                                >
-                                  Unsubscribe from task
-                                </Button>
-                              )
-                            }}
-                          </Mutation>
+                      <div>
+                          {(userData.me.role === 'SUPERADMIN' || task.createdBy.id === userData.me.id) && (
+                            <Button marginRight='10px'>
+                              <FontAwesomeIcon icon="pen" /> 
+                              Edit Task
+                            </Button>
+                          )}
+                          
+                          {task.subscribedUsers && task.subscribedUsers.filter(u => u.id === userData.me.id).length ? (
+                            <Mutation
+                              mutation={UNSUBSCRIBE_FROM_TASK}
+                              variables={{ task: task.id }}
+                              onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                            >
+                              {(unsubscribeFromTask, {data, error, loading}) => {
+                                if(error) console.log(error)
+                                
+                                return (
+                                  <Button
+                                    onClick={unsubscribeFromTask}
+                                    disabled={loading}
+                                    cancel
+                                  > 
+                                    <FontAwesomeIcon icon="bell" /> 
+                                    Stop Notifications
+                                  </Button>
+                                )
+                              }}
+                            </Mutation>
                         ) : (
                           <Mutation
                             mutation={SUBSCRIBE_TO_TASK}
@@ -240,14 +257,16 @@ class TaskPage extends Component {
                                 <Button
                                   onClick={subscribeToTask}
                                   disabled={loading}
+                                  secondary
                                 >
-                                  Subscribe to Task
+                                  <FontAwesomeIcon icon="bell" /> 
+                                  Get Notifications
                                 </Button>
                               )
                             }}
                           </Mutation>
                         )}
-                      </Controls>
+                      </div>
                     </SectionHeader>
                     
                     <Row>
@@ -293,8 +312,81 @@ class TaskPage extends Component {
                         />
                       </Col>
                       <Col sidebar>
-                      
+
                         <SidebarRow>
+                          <Heading noMargin>Status</Heading>
+
+                          {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
+                          || task.createdBy.id === userData.me.id
+                          || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
+                            ? (
+                              <Mutation
+                                mutation={UPDATE_TASK_STATUS}
+                                refetchQueries={[{ query: TASKLISTS_QUERY }]}
+                                onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                              >
+                              {( updateTaskStatus, updateStatus ) => {
+                                return (
+                                  <label htmlFor='viewByStatus'> 
+                                    <Select 
+                                      value={this.state.status || task.status}
+                                      options={[
+                                        {
+                                          value: 'CREATED',
+                                          label: 'Created',
+                                        },
+                                        {
+                                          value: 'ASSIGNED',
+                                          label: 'Assigned',
+                                        },
+                                        {
+                                          value: 'AWAITINGINPUT',
+                                          label: 'Awaiting Input',
+                                        },
+                                        {
+                                          value: 'AWAITINGASSETS',
+                                          label: 'Awaiting Assets',
+                                        },
+                                        {
+                                          value: 'AWAITINGFEEDBACK',
+                                          label: 'Awaiting Feedback',
+                                        },
+                                        {
+                                          value: 'INPROGRESS',
+                                          label: 'In Progress',
+                                        },
+                                        {
+                                          value: 'COMPLETED',
+                                          label: 'Completed',
+                                        },
+                                        {
+                                          value: 'CLOSED',
+                                          label: 'Closed',
+                                        },
+                                        {
+                                          value: 'CANCELLED',
+                                          label: 'Cancelled',
+                                        },
+                                      ]} 
+                                      onChange={(status) => this.handleStatusChange(status.value, updateTaskStatus, task.id)}
+                                      name='status'
+                                      styles={{ cursor: 'pointer' }}
+                                      placeholder={task.status}
+                                    />
+                                  </label>
+                                ) 
+                                }}
+                              </Mutation>
+                            )
+                            : <h3>{this.state.status || task.status}</h3>
+                          }
+                          
+                        </SidebarRow>
+
+                                
+                      
+                        <SidebarRow>    
+                                
                           <h4>Assigned</h4>
                           <p>This task is assigned to:</p>
                           <strong>{task.assignedTo ? (

@@ -11,7 +11,9 @@ import {
   faCheck, 
   faCheckSquare,
   faPlus,
-  faExclamationCircle
+  faExclamationCircle,
+  faPen,
+  faBell
 
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -25,5 +27,7 @@ library.add(faCode,
   faCheck, 
   faCheckSquare,
   faPlus,
-  faExclamationCircle
-  )
+  faExclamationCircle,
+  faPen,
+  faBell
+)
