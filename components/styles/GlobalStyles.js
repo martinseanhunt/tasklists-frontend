@@ -339,4 +339,8 @@ export default createGlobalStyle`
 }
 
 
+
+.react-select * { cursor: pointer !important; }
+
+
 `

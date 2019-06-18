@@ -59,6 +59,7 @@ const Button = styled.button`
 
   ${props => props.fullWidth && `
     width: 100%;
+    display: block;
   `}
 
   &:disabled {

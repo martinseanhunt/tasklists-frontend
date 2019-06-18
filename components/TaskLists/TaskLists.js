@@ -46,7 +46,7 @@ class TaskLists extends Component {
         return (
           <>
             <div>
-              {data.taskLists && data.taskLists.map((taskList, i) => {
+              {data && data.taskLists && data.taskLists.map((taskList, i) => {
                 
                 const progress = this.calculateProgress(taskList)
                 const listColor = taskList.color || '#6758F3'

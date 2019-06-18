@@ -128,6 +128,7 @@ class AddUser extends Component {
                       name="role"
                       value={role}
                       onChange={this.handleChange}
+                      className="react-select"
                     >
                       <option value="STAFF">Staff</option>
                       <option value="ADMIN">Admin</option>

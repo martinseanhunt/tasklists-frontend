@@ -71,6 +71,7 @@ const TASK_QUERY = gql`
       }
       due
       dueDate
+      priority
       assets {
         id
         assetUrl
@@ -80,6 +81,8 @@ const TASK_QUERY = gql`
       taskList {
         name
         slug
+        color
+        description
       }
       createdAt
       updatedAt
@@ -114,7 +117,7 @@ const TASK_QUERY = gql`
 `
 
 const confettiConfig = {
-  angle: 90,
+  angle: 125,
   spread: 45,
   startVelocity: 45,
   elementCount: 50,
@@ -217,7 +220,13 @@ class TaskPage extends Component {
                     >
                       <div>
                           {(userData.me.role === 'SUPERADMIN' || task.createdBy.id === userData.me.id) && (
-                            <Button marginRight='10px'>
+                            <Button 
+                              marginRight='10px'
+                              onClick={() => Router.pushRoute('editTask', { 
+                                taskListSlug: task.taskList.slug,
+                                id: task.id
+                              })}
+                            >
                               <FontAwesomeIcon icon="pen" /> 
                               Edit Task
                             </Button>
@@ -372,6 +381,7 @@ class TaskPage extends Component {
                                       name='status'
                                       styles={{ cursor: 'pointer' }}
                                       placeholder={task.status}
+                                      className="react-select"
                                     />
                                   </label>
                                 ) 
@@ -382,8 +392,20 @@ class TaskPage extends Component {
                           }
                           
                         </SidebarRow>
+                        
 
-                                
+                        <SidebarRow>    
+                          <h4>Priority</h4>
+                          <p>TODO: Design this</p>
+                          <strong>{task.priority}</strong>
+                        </SidebarRow>
+                        
+
+                        <SidebarRow>    
+                          <h4>Due Date</h4>
+                          <p>TODO: Show due date</p>
+                          <strong>TODO</strong>
+                        </SidebarRow>
                       
                         <SidebarRow>    
                                 
@@ -409,75 +431,63 @@ class TaskPage extends Component {
                           )}
                         </SidebarRow>
 
-
+                        {/* Not sure if I want to use this button       
                         <SidebarRow>
+                          {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
+                            || task.createdBy.id === userData.me.id
+                            || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
+                            && (
+                              <Mutation
+                                mutation={UPDATE_TASK_STATUS}
+                                refetchQueries={[{ query: TASKLISTS_QUERY }]}
+                                variables={{
+                                  id: task.id,
+                                  // TODO refactor this and move in to setStatus function
+                                  // there are more complicated use cases to account for
 
-                        {(['ADMIN', 'SUPERADMIN'].includes(userData.me.role)
-                          || task.createdBy.id === userData.me.id
-                          || (task.assignedTo && task.assignedTo.id === userData.me.id)) 
-                          && (
-                            <Mutation
-                              mutation={UPDATE_TASK_STATUS}
-                              refetchQueries={[{ query: TASKLISTS_QUERY }]}
-                              variables={{
-                                id: task.id,
-                                // TODO refactor this and move in to setStatus function
-                                // there are more complicated use cases to account for
+                                  // TODO Refetching is a bit of overkill here... Could do an optimistic
+                                  // thing or just manually update the cache on complete
+                                  status: ['COMPLETED', 'CLOSED'].includes(task.status) 
+                                    ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
+                                    : 'COMPLETED'
+                                }}
+                                onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
+                              >
+                              {( updateTaskStatus, updateStatus ) => {
 
-                                // TODO Refetching is a bit of overkill here... Could do an optimistic
-                                // thing or just manually update the cache on complete
-                                status: ['COMPLETED', 'CLOSED'].includes(task.status) 
-                                  ? task.assignedTo ? 'ASSIGNED' : 'CREATED'
-                                  : 'COMPLETED'
-                              }}
-                              onCompleted={() => this.setState({ clearCacheOnUnmount: true })}
-                            >
-                            {( updateTaskStatus, updateStatus ) => {
-
-                              return (
-                                  <WidgetFooter>
-                                    <div className="controls">
+                                return (
+                                  <>
                                       
-                                      {!['COMPLETED', 'CLOSED'].includes(task.status) && (
-                                        <Button cancel
-                                          onClick={() => updateTaskStatus({ variables: {
-                                            id: task.id,
-                                            status: 'CLOSED'
-                                          }})}
+                                      {['COMPLETED', 'CLOSED'].includes(task.status) ? (
+                                        <Button 
+                                          primary
+                                          fullWidth
+                                          onClick={updateTaskStatus}
+                                          disabled={updateStatus.loading}
                                         >
-                                          Clos{updateStatus.loading ? 'ing' : 'e'} Task
+                                          Re-Open{updateStatus.loading && 'ing'} Task
+                                        </Button>
+                                      ) : (
+                                        <Button 
+                                          secondary
+                                          fullWidth
+                                          onClick={updateTaskStatus}
+                                          disabled={updateStatus.loading}
+                                        >
+                                          Complet{updateStatus.loading ? 'ing' : 'e'} Task
                                         </Button>
                                       )}
-                                    </div>
-                                    
-                                    <div style={{ textAlign: 'center' }}>
-                                    <Confetti active={ ['COMPLETED'].includes(task.status) } config={ confettiConfig } />
-                                    {['COMPLETED', 'CLOSED'].includes(task.status) ? (
-                                      <Button primary
-                                        onClick={updateTaskStatus}
-                                        disabled={updateStatus.loading}
-                                      >
-                                        Re-Open{updateStatus.loading && 'ing'} Task
-                                      </Button>
-                                    ) : (
-                                      <Button secondary
-                                        onClick={updateTaskStatus}
-                                        disabled={updateStatus.loading}
-                                      >
-                                        Complet{updateStatus.loading ? 'ing' : 'e'} Task
-                                      </Button>
-                                    )}
-                                    </div>
+                                    </>
+                                  ) 
+                                }}
+                              </Mutation>
+                            )
+                          }
+                        </SidebarRow>
+                        */} 
 
-                                  </WidgetFooter>
-                                ) 
-                              }}
-                            </Mutation>
-                          )
-                        }
-                      </SidebarRow>
+                        <Confetti active={ ['COMPLETED'].includes(task.status) } config={ confettiConfig } />
 
-                      
                       </Col>
                     </Row>
                   </Container>

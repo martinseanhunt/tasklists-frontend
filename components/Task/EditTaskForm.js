@@ -33,15 +33,7 @@ import clearCache from '../../utils/clearCache'
 import { TASKLISTS_QUERY } from '../TaskLists/TaskLists'
 import { ALL_USERS_QUERY } from '../settings/Users'
 
-// TODO PRIORITY refactor this in to multiple components
-
-// TODO test this with various roles
-
-// TODO WYSIWYG
-
-// TODO Make title / description more like design in Zeplin
-
-// TODO allow individualised notification settings for each task
+// TODO PRIORITY REFACTOR - THIS IS MOSTLY REPEATED, refactor in to shared components
 
 const CREATE_TASK_MUTATION = gql`
   mutation CREATE_TASK_MUTATION(
@@ -87,6 +79,17 @@ class CreateTaskForm extends Component {
     assignedTo: '',
     customFields: [],
     editorState: EditorState.createEmpty(),
+  }
+
+  componentDidMount = () => {
+    const { title, priority } = this.props.task
+
+    console.log(priority)
+
+    this.setState({
+      title,
+      priority
+    })
   }
 
   handleChange = (e) => {    
@@ -201,8 +204,31 @@ class CreateTaskForm extends Component {
 
   render() {
     const { title, description, dueDate, dateDisabled, assets } = this.state
-    const { taskList, user } = this.props
+    const { taskList, user, task } = this.props
     const customFields = taskList.taskListFields
+
+    const priorityOptions = [
+      {
+        value: 'LOWEST',
+        label: 'Lowest',
+      },
+      {
+        value: 'LOW',
+        label: 'Low',
+      },
+      {
+        value: 'MEDIUM',
+        label: 'Medium',
+      },
+      {
+        value: 'HIGH',
+        label: 'High',
+      },
+      {
+        value: 'URGENT',
+        label: 'Urgent',
+      },
+    ]
 
     return (
       <Mutation
@@ -218,8 +244,8 @@ class CreateTaskForm extends Component {
           >
             <SectionHeader 
               taskList={taskList}
-              title={`New Task`}
-              subTitle={`You're creating a task in ${taskList.name}`}
+              title={task.title}
+              subTitle={`You're editing a task in ${taskList.name}`}
             >
               <Controls>
                 <Button style={{ display: 'none' }}>
@@ -232,7 +258,7 @@ class CreateTaskForm extends Component {
                   disabled={loading}
                   style={{ width: '200px' }}
                 >
-                  Create Task
+                  Edit Task
                 </Button>
               </Controls>
             </SectionHeader>
@@ -443,32 +469,12 @@ class CreateTaskForm extends Component {
                   <fieldset className="no-margin">
                     <label htmlFor="due"  className="heading">Priority Level</label>
                       <Select 
-                        options={[
-                          {
-                            value: 'LOWEST',
-                            label: 'Lowest',
-                          },
-                          {
-                            value: 'LOW',
-                            label: 'Low',
-                          },
-                          {
-                            value: 'MEDIUM',
-                            label: 'Medium',
-                          },
-                          {
-                            value: 'HIGH',
-                            label: 'High',
-                          },
-                          {
-                            value: 'URGENT',
-                            label: 'Urgent',
-                          },
-                        ]} 
+                        options={priorityOptions} 
                         onChange={this.handlePriorityChange}
                         name="priority"
                         placeholder={'Low'}
                         className="react-select"
+                        value={priorityOptions.find(option => option.value === this.state.priority)}
                       />
                   </fieldset>
                 </SidebarRow>

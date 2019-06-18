@@ -7,3 +7,4 @@ routes
   .add('task', '/task/:id', 'task') 
   // New url structure for tasks includes tasklist slug for dynamic sidebar
   .add('taskWithSlug', '/task/:taskListSlug/:id', 'task')
+  .add('editTask', '/task/:taskListSlug/:id/edit', 'editTask')

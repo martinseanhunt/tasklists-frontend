@@ -32,6 +32,7 @@ class AssignToUser extends Component {
                 isClearable={true}
                 onChange={this.props.onChange}
                 name="user"
+                className="react-select"
               />    
             </Container>
           )

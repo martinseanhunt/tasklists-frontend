@@ -187,6 +187,7 @@ class CreateTaskList extends Component {
                               value={this.state.taskListFields[i].fieldType}
                               data-id={i}
                               data-name='fieldType'
+                              className="react-select"
                             >
                               <option value="STRING">Text</option>
                               <option value="DATE">Date</option>

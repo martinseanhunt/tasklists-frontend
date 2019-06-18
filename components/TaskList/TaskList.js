@@ -121,6 +121,7 @@ class TaskList extends Component {
                     name='viewing'
                     styles={{ cursor: 'pointer' }}
                     placeholder='Viewing Open Tasks'
+                    className="react-select"
                   />
                 </label>
                 <Button 
