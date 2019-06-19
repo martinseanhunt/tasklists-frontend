@@ -215,7 +215,7 @@ class TaskPage extends Component {
                   <Container noPadd>
                     <SectionHeader 
                       taskList={task.taskList}
-                      title={task.title}
+                      title={task && task.title}
                       subTitle={`${task.createdBy.name} created this task on ${moment(task.createdAt).format('MMM Do YYYY')}`}
                     >
                       <div>

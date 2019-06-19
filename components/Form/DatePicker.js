@@ -5,7 +5,8 @@ class DatePickerComponent extends Component {
   render() {
     return (
       <div>
-        <DayPickerInput onDayChange={this.props.setDate} disabled={this.props.disabled} />
+        <DayPickerInput onDayChange={this.props.setDate} disabled={this.props.disabled} selectedDay={this.props.selected}
+        value={this.props.selected} />
       </div>
     )
   }

@@ -3,7 +3,7 @@ import { Mutation, withApollo, Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import Select from 'react-select'
 import moment from 'moment'
-import { EditorState, convertToRaw } from 'draft-js'
+import { EditorState, convertToRaw, ContentState, convertFromRaw } from 'draft-js'
 
 import { Router } from '../../routes'
 
@@ -35,8 +35,8 @@ import { ALL_USERS_QUERY } from '../settings/Users'
 
 // TODO PRIORITY REFACTOR - THIS IS MOSTLY REPEATED, refactor in to shared components
 
-const CREATE_TASK_MUTATION = gql`
-  mutation CREATE_TASK_MUTATION(
+const EDIT_TASK_MUTATION = gql`
+  mutation EDIT_TASK_MUTATION(
     $title: String!
     $description: String!
     $richText: String
@@ -47,8 +47,9 @@ const CREATE_TASK_MUTATION = gql`
     $customFields: [CreateRelatedCustomField]
     $taskListSlug: String!
     $assets: [CreateRelatedAsset]
+    $id: ID!
   ) {
-    createTask(
+    editTask(
       title: $title
       description: $description
       richText: $richText
@@ -59,6 +60,7 @@ const CREATE_TASK_MUTATION = gql`
       taskList: $taskListSlug
       assets: $assets
       priority: $priority
+      id: $id
     ){
       id
       taskList{
@@ -68,7 +70,7 @@ const CREATE_TASK_MUTATION = gql`
   }
 `
 
-class CreateTaskForm extends Component {
+class EditTaskForm extends Component {
   state = {
     due: null,
     dateDisabled: true,
@@ -82,13 +84,18 @@ class CreateTaskForm extends Component {
   }
 
   componentDidMount = () => {
-    const { title, priority } = this.props.task
-
-    console.log(priority)
-
+    const { title, priority, assignedTo, due, dueDate, richText, customFields, assets } = this.props.task
+    console.log(assets)
     this.setState({
       title,
-      priority
+      priority,
+      assignedTo: assignedTo ? assignedTo.id : null,
+      due,
+      dateDisabled: !['ONDATE', 'BYDATE'].includes(due),
+      dueDate,
+      editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(richText))),
+      customFields,
+      assets
     })
   }
 
@@ -166,7 +173,7 @@ class CreateTaskForm extends Component {
     this.setState({ customFields })
   }
 
-  createTask = (createTaskMutation) => {
+  editTask = (editTaskMutation) => {
     // TODO this makes sense to me but not sure it would to others... refactor
 
     let { dueDate, customFields, due, editorState } = this.state
@@ -188,22 +195,29 @@ class CreateTaskForm extends Component {
       dueDate: dueDate ? dueDate : null,
       customFields,
       description: ContentState.getPlainText(),
-      richText: JSON.stringify(convertToRaw(ContentState))
+      richText: JSON.stringify(convertToRaw(ContentState)),
+      id: this.props.task.id,
+      assets: this.state.assets.map(a => ({
+        assetUrl: a.assetUrl,
+        assetType: a.assetType,
+        title: a.title,
+        id: a.id
+      }))
     }
 
-    createTaskMutation({ variables: task })
+    editTaskMutation({ variables: task })
   }
   
-  onCompleted = async ({ createTask }) => {
+  onCompleted = async ({ editTask }) => {
     //props.client.resetStore() // working but coul dbe slow
     // props.client.resetStore() // not working
     await clearCache(this.props.client.cache, true)
-    Router.pushRoute('taskWithSlug', { id: createTask.id, taskListSlug: createTask.taskList.slug })
+    Router.pushRoute('taskWithSlug', { id: editTask.id, taskListSlug: editTask.taskList.slug })
   }
     
 
   render() {
-    const { title, description, dueDate, dateDisabled, assets } = this.state
+    const { title, dueDate, dateDisabled, assets } = this.state
     const { taskList, user, task } = this.props
     const customFields = taskList.taskListFields
 
@@ -230,13 +244,28 @@ class CreateTaskForm extends Component {
       },
     ]
 
+    const dueOptions = [
+      {
+        value: '',
+        label: 'No Due Date',
+      },
+      {
+        value: 'BYDATE',
+        label: 'By Date',
+      },
+      {
+        value: 'ONDATE',
+        label: 'On Date',
+      },
+    ]
+
     return (
       <Mutation
-        mutation={CREATE_TASK_MUTATION}
+        mutation={EDIT_TASK_MUTATION}
         onCompleted={this.onCompleted}
         refetchQueries={[{ query: TASKLISTS_QUERY }]}
       >
-        {( createTask, { error, loading } ) => (
+        {( editTask, { error, loading } ) => (
           <Form 
             onSubmit={(e) => e.preventDefault()}
             noPadd 
@@ -244,7 +273,7 @@ class CreateTaskForm extends Component {
           >
             <SectionHeader 
               taskList={taskList}
-              title={task.title}
+              title={title}
               subTitle={`You're editing a task in ${taskList.name}`}
             >
               <Controls>
@@ -254,11 +283,11 @@ class CreateTaskForm extends Component {
 
                 <Button 
                   secondary
-                  onClick={() => this.createTask(createTask)}  
+                  onClick={() => this.editTask(editTask)}  
                   disabled={loading}
                   style={{ width: '200px' }}
                 >
-                  Edit Task
+                  Save Changes
                 </Button>
               </Controls>
             </SectionHeader>
@@ -384,7 +413,7 @@ class CreateTaskForm extends Component {
                                 type="text"
                                 placeholder="http://someurl.org/image.jpg"
                                 onChange={this.handleChange}
-                                value={this.state.assets[i].asset}
+                                value={this.state.assets[i].assetUrl}
                                 data-id={i}
                                 data-name='assetUrl'
                               />
@@ -434,23 +463,11 @@ class CreateTaskForm extends Component {
                     <label htmlFor="due"  className="heading">Task Due</label>
                       <Select 
                         className="react-select"
-                        options={[
-                          {
-                            value: '',
-                            label: 'No Due Date',
-                          },
-                          {
-                            value: 'BYDATE',
-                            label: 'By Date',
-                          },
-                          {
-                            value: 'ONDATE',
-                            label: 'On Date',
-                          },
-                        ]} 
+                        options={dueOptions} 
                         onChange={this.handleDueChange}
                         name="due"
                         placeholder={'No Due Date'}
+                        value={dueOptions.find(option => option.value === this.state.due)}
                       />
                   </fieldset>
 
@@ -459,7 +476,8 @@ class CreateTaskForm extends Component {
                       <DatePicker 
                         animate={!dateDisabled}
                         disabled={dateDisabled}
-                        date={dueDate}
+                        date={typeof dueDate === 'string' ? new Date(dueDate) : dueDate}
+                        selected={typeof dueDate === 'string' ? new Date(dueDate) : dueDate}
                         setDate={this.setDate}
                       />
                     )}
@@ -482,7 +500,7 @@ class CreateTaskForm extends Component {
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>
                     <label htmlFor="user"  className="heading">Assign Task to user</label>
-                    <AssignToUser name="user" onChange={this.handleUserChange}/>
+                    <AssignToUser name="user" onChange={this.handleUserChange} selected={this.state.assignedTo}/>
                   </SidebarRow>
                 )}
               </Col>
@@ -494,4 +512,4 @@ class CreateTaskForm extends Component {
   }
 }
 
-export default withApollo(CreateTaskForm)
+export default withApollo(EditTaskForm)

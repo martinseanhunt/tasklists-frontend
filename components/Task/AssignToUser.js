@@ -33,6 +33,7 @@ class AssignToUser extends Component {
                 onChange={this.props.onChange}
                 name="user"
                 className="react-select"
+                value={this.props.selected && options.find(option => option.value === this.props.selected)}
               />    
             </Container>
           )
