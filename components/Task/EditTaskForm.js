@@ -482,7 +482,8 @@ class EditTaskForm extends Component {
                       />
                     )}
                 </SidebarRow>
-
+                
+                {dateDisabled && (
                 <SidebarRow>
                   <fieldset className="no-margin">
                     <label htmlFor="due"  className="heading">Priority Level</label>
@@ -496,6 +497,7 @@ class EditTaskForm extends Component {
                       />
                   </fieldset>
                 </SidebarRow>
+                )}
                 
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>

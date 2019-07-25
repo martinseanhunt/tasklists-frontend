@@ -433,15 +433,17 @@ class TaskPage extends Component {
                           
                         </SidebarRow>
                         
-
-                        <SidebarRow>    
+                        {task.priority && (
+                          <SidebarRow>    
                           <Heading noMargin>Priority</Heading>
                           <SidebarData
                             highlight={priorityColorMap[task.priority] || null}
                           >
                             {task.priority ? task.priority.toLowerCase() : '-'}
                           </SidebarData>
-                        </SidebarRow>
+                          </SidebarRow>
+                        )}
+                        
                         
 
                         <SidebarRow>    

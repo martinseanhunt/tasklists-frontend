@@ -438,40 +438,42 @@ class CreateTaskForm extends Component {
                       />
                     )}
                 </SidebarRow>
-
-                <SidebarRow>
-                  <fieldset className="no-margin">
-                    <label htmlFor="due"  className="heading">Priority Level</label>
-                      <Select 
-                        options={[
-                          {
-                            value: 'LOWEST',
-                            label: 'Lowest',
-                          },
-                          {
-                            value: 'LOW',
-                            label: 'Low',
-                          },
-                          {
-                            value: 'MEDIUM',
-                            label: 'Medium',
-                          },
-                          {
-                            value: 'HIGH',
-                            label: 'High',
-                          },
-                          {
-                            value: 'URGENT',
-                            label: 'Urgent',
-                          },
-                        ]} 
-                        onChange={this.handlePriorityChange}
-                        name="priority"
-                        placeholder={'Low'}
-                        className="react-select"
-                      />
-                  </fieldset>
-                </SidebarRow>
+                
+                {dateDisabled && (
+                  <SidebarRow>
+                    <fieldset className="no-margin">
+                      <label htmlFor="due"  className="heading">Priority Level</label>
+                        <Select 
+                          options={[
+                            {
+                              value: 'LOWEST',
+                              label: 'Lowest',
+                            },
+                            {
+                              value: 'LOW',
+                              label: 'Low',
+                            },
+                            {
+                              value: 'MEDIUM',
+                              label: 'Medium',
+                            },
+                            {
+                              value: 'HIGH',
+                              label: 'High',
+                            },
+                            {
+                              value: 'URGENT',
+                              label: 'Urgent',
+                            },
+                          ]} 
+                          onChange={this.handlePriorityChange}
+                          name="priority"
+                          placeholder={'Low'}
+                          className="react-select"
+                        />
+                    </fieldset>
+                  </SidebarRow>
+                )}
                 
                 {['ADMIN', 'SUPERADMIN'].includes(user.role) && (
                   <SidebarRow>
