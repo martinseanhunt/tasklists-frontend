@@ -32,6 +32,9 @@ import BreadCrumb from '../components/styles/BreadCrumb'
 import Comments from '../components/Task/Comments'
 
 import clearCache from '../utils/clearCache'
+import alphaHex from '../utils/alphaHex'
+import dateColor from '../utils/dateColor'
+import { dueTypeMap, statusMap, statusColorMap, priorityColorMap } from '../utils/dataMaps'
 import { TASKLISTS_QUERY } from '../components/TaskLists/TaskLists'
 
 // TODO design this page
@@ -51,6 +54,43 @@ import { TASKLISTS_QUERY } from '../components/TaskLists/TaskLists'
 // TODO /  QUESTION I believe that putting the queries at the page level here is stopping the loading state from working correctly because the page isn't loading at all until the query resolves. Should move these queries to the component level
 
 // TODO change close / complete to status drop down (less ugly)
+
+const dot = (color = '#ccc') => ({
+  alignItems: 'center',
+  display: 'flex',
+
+  ':before': {
+    backgroundColor: color,
+    borderRadius: 10,
+    content: '" "',
+    display: 'block',
+    marginRight: 8,
+    height: 10,
+    width: 10,
+  },
+});
+
+const colourStyles = (selectedValue) => ({
+  control: (styles, { data }) => {
+    console.log(data)
+    return { ...styles, backgroundColor: 'white' }
+  
+  },
+  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    return {
+      ...styles,
+      backgroundColor: 
+        isFocused ? 
+          `${alphaHex(statusColorMap[data.value], 0.3)}`
+          : `${alphaHex(statusColorMap[data.value], 0.05)}`
+    };
+  },
+  input: styles => ({ ...styles, ...dot(statusColorMap[selectedValue]) }),
+  placeholder: styles => ({ ...styles, ...dot(statusColorMap[selectedValue]) }),
+  singleValue: (styles, { data }) => ({ ...styles, ...dot(statusColorMap[data.value]) }),
+});
+
+
 
 const TASK_QUERY = gql`
   query TASK_QUERY($id: ID!) {
@@ -379,7 +419,7 @@ class TaskPage extends Component {
                                       ]} 
                                       onChange={(status) => this.handleStatusChange(status.value, updateTaskStatus, task.id)}
                                       name='status'
-                                      styles={{ cursor: 'pointer' }}
+                                      styles={colourStyles(this.state.status || task.status)}
                                       placeholder={task.status}
                                       className="react-select"
                                     />
@@ -395,28 +435,42 @@ class TaskPage extends Component {
                         
 
                         <SidebarRow>    
-                          <h4>Priority</h4>
-                          <p>TODO: Design this</p>
-                          <strong>{task.priority}</strong>
+                          <Heading noMargin>Priority</Heading>
+                          <SidebarData
+                            highlight={priorityColorMap[task.priority] || null}
+                          >
+                            {task.priority ? task.priority.toLowerCase() : '-'}
+                          </SidebarData>
                         </SidebarRow>
                         
 
                         <SidebarRow>    
-                          <h4>Due Date</h4>
-                          <p>TODO: Show due date</p>
-                          <strong>TODO</strong>
+                          <Heading noMargin>Due Date</Heading>
+                          <SidebarData  
+                            highlight={dateColor(task.dueDate)}
+                          > 
+                            {task.due ? (
+                              <>
+                              {dueTypeMap[task.due]}
+                              {['BYDATE', 'ONDATE'].includes(task.due) && 
+                                moment(task.dueDate).format('MMM Do')}
+                              </>
+                            ) : <small>No Due Date</small>}
+                          
+                          </SidebarData>
                         </SidebarRow>
                       
                         <SidebarRow>    
                                 
-                          <h4>Assigned</h4>
-                          <p>This task is assigned to:</p>
-                          <strong>{task.assignedTo ? (
-                            <>
-                              <Avatar user={task.assignedTo} />
-                              {task.assignedTo.name}
-                            </>
-                          ) : <p>None</p>}</strong>
+                          <Heading noMargin>Assigned to</Heading>
+                          <SidebarData>
+                            <strong>{task.assignedTo ? (
+                              <>
+                                <Avatar user={task.assignedTo} />
+                                {task.assignedTo.name}
+                              </>
+                            ) : <p>None</p>}</strong>
+                          </SidebarData>
                         </SidebarRow>
 
                         <SidebarRow>
@@ -593,4 +647,31 @@ const TaskDetailHeader = styled.div`
     font-size: 1.2rem;
     display: block;
   }
+`
+
+const SidebarData = styled.div`
+  border: 1px solid #e2e5ed; 
+  padding: 12px 12px;
+  border-radius: 4px;
+  text-transform: capitalize;
+  font-size: 13px;
+  min-width: 70px;
+
+  small {
+    color: #ccc;
+    font-size: 13px;
+  }
+
+  ${props => props.status && `
+    background: ${alphaHex(statusColorMap[props.status], 0.9)};
+    font-weight: 500;
+    color: #fff;
+  `}
+
+  ${props => props.highlight && `
+    background: ${alphaHex(props.highlight, 0.9)};
+    font-weight: 500;
+    color: #fff;
+  `}
+
 `

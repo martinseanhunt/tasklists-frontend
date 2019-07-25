@@ -6,6 +6,8 @@ import { Router } from '../../routes'
 
 import Avatar from '../common/Avatar'
 import alphaHex from '../../utils/alphaHex'
+import { dueTypeMap, statusMap, statusColorMap, priorityColorMap } from '../../utils/dataMaps'
+import dateColor from '../../utils/dateColor'
 
 // TODO once functionality is somewhat complete make sure 
 // this is all split in to the relevant components and we're not repeating ourselves 
@@ -15,49 +17,6 @@ import alphaHex from '../../utils/alphaHex'
 
 // TODO Have a WAITINGON task status which shows as yellow and on hover tells you
 // The Staff member who's assigned to the last comment that we're waiting on assets etc
-
-const dueTypeMap = {
-  ASAP: 'ASAP',
-  WHENPOSSIBLE: 'when possible',
-  BYDATE: 'by ',
-  ONDATE: 'on '
-}
-
-const statusMap = {
-  CREATED: 'Created',
-  ASSIGNED: 'Assigned',
-  AWAITINGINPUT: 'Awaiting Input',
-  AWAITINGASSETS: 'Awaiting Assets',
-  AWAITINGFEEDBACK: 'Awaiting Feedback',
-  INPROGRESS: 'In Progress',
-  COMPLETED: 'Completed', 
-  CLOSED: 'Closed',
-  CANCELLED: 'Cancelled'
-}
-
-const statusColorMap = {
-  CREATED: '#1665D8',
-  ASSIGNED: '#6758F3',
-  AWAITINGINPUT: '#F6AB2F',
-  AWAITINGASSETS: '#E6492D',
-  AWAITINGFEEDBACK: '#F6AB2F',
-  INPROGRESS: '#FACF55',
-  COMPLETED: '#34AA44', 
-  CLOSED: '#000001',
-  CANCELLED: '#000001'
-}
-
-const priorityColorMap = {
-  HIGH: '#FACF55',
-  URGENT: '#E6492D'
-}
-
-const dateColor = (date) => {
-  if (!date) return null
-  if(moment().isAfter(date)) return '#E6492D'
-  if(moment().diff(date, 'days') < 3) return '#F6AB2F'
-  return null
-}
 
 const ListViewItem = ({ task, division }) => {
   return (
